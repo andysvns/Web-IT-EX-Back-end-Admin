@@ -1,37 +1,30 @@
 <template>
-    <v-container>
-      <v-row justify="center">
-        <v-col cols="12" sm="8" md="6">
-          <v-card>
-            <v-card-title class="headline">
-              Welcome to the Admin Dashboard
-            </v-card-title>
-            <v-card-text>
-              <p>You have successfully logged in as an administrator.</p>
-              <!-- Add more admin functionality here -->
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="primary" @click="logout">
-                Logout
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </template>
+  <div>
+    
+  </div>
+</template>
   
   <script>
   export default {
     name: 'AdminPage',
-    methods: {
-      logout() {
-        // Clear the token
-        localStorage.removeItem('token');
-        // Redirect to login page
-        this.$router.push({ name: 'AdminLogin' });
-      }
-    }
+   
   }
   </script>
+
+<style lang="scss" scoped>
+.side-bar-nav{
+  
+  background-color: #002140;
+}
+.logo{
+  width: 150px;
+  margin: 5%
+}
+.icon{
+  color: #ffffff;
+}
+.title-text{
+  color: #ffffff;
+}
+
+</style>  
