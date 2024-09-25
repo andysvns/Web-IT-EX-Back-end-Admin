@@ -11,8 +11,8 @@
                     hide-details></v-text-field>
             </v-card-title>
 
-            <v-data-table :headers="headers" :items="contacts" :search="search" :loading="loading" :items-per-page="5"
-                class="elevation-1">
+            <v-data-table :headers="headers" :items="items" :search="search" :loading="loading" :items-per-page="5" 
+                class="elevation-1 ">
                 <template v-slot:item="{ item, index }">
 
                     <tr>
@@ -26,11 +26,11 @@
                         <td>{{ item.title }}</td>
                         <td class="desc-td">{{ item.desc }}</td>
                         <td class="action-td">
-                            <v-btn small color="secondary" @click="editItem(item)">
-                                ແກ້ໄຂ
+                            <v-btn small color="green" @click="editItem(item)">
+                                <v-icon>mdi-pencil-outline</v-icon>
                             </v-btn>
                             <v-btn small color="red" @click="deleteItem(item)">
-                                ລົບ
+                                <v-icon>mdi-delete</v-icon>
                             </v-btn>
                         </td>
                     </tr>
@@ -52,16 +52,16 @@ export default {
         return {
             search: '',
             loading: true,
-            contacts: [],
+            items: [],
             error: null,
             headers: [
 
-                { text: 'List', value: 'list',sortable: false },
-                { text: 'Icon', value: 'icon' },
-                { text: 'Name', value: 'icon name' },
-                { text: 'Title', value: 'title' },
-                { text: 'Description', value: 'description' },
-                { text: 'Actions', value: 'actions', sortable: false },
+                { text: 'List', value: 'list',headerClass: 'text-center',align: 'center', sortable: false },
+                { text: 'Icon', value: 'icon',headerClass: 'text-center',align: 'center', },
+                { text: 'Name', value: 'icon name',headerClass: 'text-center',align: 'center', },
+                { text: 'Title', value: 'title', align: 'center', },
+                { text: 'Description', value: 'description', align: 'center', },
+                { text: 'Actions', value: 'actions', sortable: false,align: 'center', },
             ],
         };
     },
@@ -72,7 +72,7 @@ export default {
         async fetchContactInfo() {
             try {
                 const response = await axios.get('http://localhost:3000/listtask');
-                this.contacts = Array.isArray(response.data) ? response.data : [response.data];
+                this.items = Array.isArray(response.data) ? response.data : [response.data];
                 this.loading = false;
             } catch (err) {
                 this.error = 'Failed to fetch contact information: ' + err.message;
@@ -104,10 +104,16 @@ export default {
     text-overflow: ellipsis; 
 }
 
-.action-td .v-btn{
-    margin-right: 25px;
+.action-td {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+
 }
 
+::v-deep .th {
+  text-align: center;
+}
 
 ::v-deep .v-data-table-header th {
     font-weight: 900;
