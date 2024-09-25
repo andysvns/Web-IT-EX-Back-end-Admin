@@ -42,6 +42,18 @@ const routes = [
     component: () => import("../components/HomeComponents/ListTaskPage/ListTask.vue"),
     meta: { title: 'List Task' ,requiresAuth: true }
   },
+  {
+    path: "/listtask/create",
+    name: "ListTaskCreate",
+    component: () => import("../components/HomeComponents/ListTaskPage/ListTaskCreate.vue"),
+    meta: { title: 'List Task' ,requiresAuth: true }
+  },
+  {
+    path: "/listtask/edit/:id",
+    name: "ListTaskEdit",
+    component: () => import("../components/HomeComponents/ListTaskPage/ListTaskEdit.vue"),
+    meta: { title: 'List Task' ,requiresAuth: true }
+  },
 
   {
     path: "/contact",

@@ -155,7 +155,7 @@ app.get("/background", async (req, res) => {
 
 //List Task
 //Create List Task
-app.post("/create/listtask", async (req, res) => {
+app.post("/listtask/create", async (req, res) => {
   const { icon, title, desc } = req.body;
   console.log("Task creation attempt for title:", title);
 
@@ -233,7 +233,7 @@ app.put("/listtask/update/:id", async (req, res) => {
   try {
     // Use parameterized query to update the contact record, preventing SQL injection
     const [result] = await pool.query(
-      "UPDATE list_task SET icon = ?, title = ?, desc = ?, updated_at = CURRENT_TIMESTAMP WHERE list_task_id = ?",
+      "UPDATE list_task SET icon = ?, title = ?, `desc` = ?, updated_at = CURRENT_TIMESTAMP WHERE list_task_id = ?",
       [icon, title, desc, id]
     );
 

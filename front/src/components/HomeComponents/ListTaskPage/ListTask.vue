@@ -16,9 +16,9 @@
                 <template v-slot:item="{ item, index }">
 
                     <tr>
-                        <td>{{ index + 1 }}</td>
+                        <td class="text-center">{{ index + 1 }}</td>
                         <td class="icon-td">
-                            <v-icon>
+                            <v-icon color="secondary" class="icon-item">
                                 {{ item.icon }}
                             </v-icon>
                         </td>
@@ -26,11 +26,11 @@
                         <td>{{ item.title }}</td>
                         <td class="desc-td">{{ item.desc }}</td>
                         <td class="action-td">
-                            <v-btn small color="green" @click="editItem(item)">
-                                <v-icon>mdi-pencil-outline</v-icon>
+                            <v-btn text small  @click="editItem(item)">
+                                <v-icon color="secondary">mdi-pencil-outline</v-icon>
                             </v-btn>
-                            <v-btn small color="red" @click="deleteItem(item)">
-                                <v-icon>mdi-delete</v-icon>
+                            <v-btn text small @click="deleteItem(item)">
+                                <v-icon color="#EA2A2D">mdi-delete</v-icon>
                             </v-btn>
                         </td>
                     </tr>
@@ -57,7 +57,7 @@ export default {
             headers: [
 
                 { text: 'List', value: 'list',headerClass: 'text-center',align: 'center', sortable: false },
-                { text: 'Icon', value: 'icon',headerClass: 'text-center',align: 'center', },
+                { text: 'Icon', value: 'icon',headerClass: 'text-center',align: 'center', sortable: false },
                 { text: 'Name', value: 'icon name',headerClass: 'text-center',align: 'center', },
                 { text: 'Title', value: 'title', align: 'center', },
                 { text: 'Description', value: 'description', align: 'center', },
@@ -81,7 +81,7 @@ export default {
             }
         },
         addNew() {
-            console.log('Add new item');
+            this.$router.push({ name: 'ListTaskCreate' });
         },
         editItem(item) {
             this.$router.push({ name: 'ListTaskEdit', params: { id: item.list_task_id } });
@@ -110,9 +110,10 @@ export default {
     align-items: center;
 
 }
-
-::v-deep .th {
-  text-align: center;
+.icon-item{
+    font-size: 36px;
+    display: flex;
+    align-items: center;
 }
 
 ::v-deep .v-data-table-header th {
