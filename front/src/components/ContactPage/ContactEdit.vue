@@ -5,18 +5,18 @@
             <v-form ref="form" v-model="valid" lazy-validation>
                 <!-- Phone Number -->
                 <v-text-field v-model="contact.phone_number" :rules="phoneRules" label="Phone Number"
-                    placeholder="Please Enter" required></v-text-field>
+                    placeholder="Please Enter" outlined required></v-text-field>
 
                 <!-- Email -->
-                <v-text-field v-model="contact.email" :rules="emailRules" label="Email" placeholder="Please Enter"
+                <v-text-field v-model="contact.email" :rules="emailRules" label="Email" placeholder="Please Enter" outlined
                     required></v-text-field>
 
                 <!-- URL Address -->
-                <v-textarea v-model="contact.address_url" :rules="urlRules" label="Description"
+                <v-textarea v-model="contact.address_url" :rules="urlRules" label="Description" outlined
                     placeholder="Please Enter" required rows="5" auto-grow></v-textarea>
 
                 <!-- Location -->
-                <v-text-field v-model="contact.address" :rules="locationRules" label="Location"
+                <v-text-field v-model="contact.address" :rules="locationRules" label="Location" outlined
                     placeholder="Please Enter" required></v-text-field>
 
                 <v-card-actions>

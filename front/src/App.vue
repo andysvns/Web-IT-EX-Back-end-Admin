@@ -82,9 +82,9 @@
             block
             outlined
             class="mb-2"
-            @click="addNewUser"
+            @click="RePassword"
           >
-            + Add New User
+            Reset Password
           </v-btn>
           <v-btn
             block
@@ -171,7 +171,8 @@
           { 
           title: 'Contact',
           icon: 'mdi-contacts',
-          path: '/contact' },
+          path: '/contact' 
+        },
 
           
           

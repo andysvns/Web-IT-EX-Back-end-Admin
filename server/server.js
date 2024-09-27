@@ -251,6 +251,28 @@ app.put("/listtask/update/:id", async (req, res) => {
 });
 
 //Delete one List Task
+app.put("/listtask/del/:id", async (req, res) => {
+  const { id } = req.params; // Extract the 'id' from the request parameters
+
+  try {
+    // Use parameterized query to update the 'stt' field, preventing SQL injection
+    const [result] = await pool.query(
+      "UPDATE list_task SET stt = 0, updated_at = CURRENT_TIMESTAMP WHERE list_task_id = ?",
+      [id]
+    );
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "stt field updated successfully" }); // Respond with success if a record was updated
+    } else {
+      res.status(404).json({ message: "Record not found" }); // If no record was updated, return 404
+    }
+  } catch (error) {
+    console.error("Error updating stt field by ID:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to update stt field", details: error.message });
+  }
+});
 
 // Get All Contact
 app.get("/contact", async (req, res) => {

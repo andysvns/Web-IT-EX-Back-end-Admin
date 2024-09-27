@@ -34,6 +34,19 @@
           </v-col>
         </v-row>
       </v-form>
+                    <!-- Success snackbar -->
+                    <v-snackbar v-model="snackbarSuccess" bottom right color="success">
+      <v-icon color="white" left>mdi-check-circle</v-icon>
+      Edited item successfully!
+      <v-btn color="white" text @click="snackbarSuccess = false">Close</v-btn>
+    </v-snackbar>
+
+    <!-- Error snackbar -->
+    <v-snackbar v-model="snackbarError" bottom right color="error">
+      <v-icon color="white" left>mdi-alert-circle</v-icon>
+      Failed to edit item. Please try again.
+      <v-btn color="white" text @click="snackbarError = false">Close</v-btn>
+    </v-snackbar>
     </v-container>
   </template>
   
@@ -45,6 +58,8 @@
     data() {
       return {
         valid: false,
+        snackbarSuccess: false,
+        snackbarError: false,
         item: {
           icon: '',
           title: '',
@@ -101,16 +116,18 @@
         }
   
         try {
-          const response = await axios.put(`http://localhost:3000/listtask/update/${id}`, this.item);
-          if (response.status === 200) {
-            this.$emit('item-updated', response.data);
-            alert('Item updated successfully!');
+        const response = await axios.put(`http://localhost:3000/listtask/update/${id}`, this.item);
+        if (response.status === 200) {
+          this.$emit('item-updated', response.data);
+          this.snackbarSuccess = true; // Show success snackbar
+          setTimeout(() => {
             this.$router.go(-1);
-          }
-        } catch (err) {
-          console.error('Failed to update item:', err);
-          alert('Failed to update item. Please try again.');
+          }, 1500); // Wait for 1.5 seconds before navigating back
         }
+      } catch (err) {
+        console.error('Failed to update item:', err);
+        this.snackbarError = true; // Show error snackbar
+      }
       }
     }
   }
