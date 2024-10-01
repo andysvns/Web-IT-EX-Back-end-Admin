@@ -9,12 +9,19 @@ const multer = require("multer");
 const path = require("path");
 
 // Configure storage for uploaded files
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, 'uploads/') // Make sure this directory exists
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, Date.now() + path.extname(file.originalname)) // Appending extension
+//   }
+// });
+
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/') // Make sure this directory exists
-  },
+  destination: './uploads',
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)) // Appending extension
+    cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 
@@ -45,6 +52,8 @@ function checkFileType(file, cb) {
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
+
 
 // Database connection
 const pool = mysql.createPool({
@@ -312,27 +321,6 @@ app.put("/listtask/del/:id", async (req, res) => {
   }
 });
 
-//Get all Our Product
-
-app.get("/ourproduct", async (req, res) => {
-  try {
-    const [results] = await pool.query("SELECT * FROM our_product WHERE stt = 1");
-    
-    // Modify the image paths to include the full URL
-    const modifiedResults = results.map(product => ({
-      ...product,
-      img: product.img ? `${req.protocol}://${req.get('host')}${product.img}` : null
-    }));
-
-    res.status(200).json(modifiedResults);
-  } catch (error) {
-    console.error("Error fetching data from the database:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to retrieve records", details: error.message });
-  }
-});
-
 //Create Our Product
 app.post("/ourproduct/create", upload.single("img"), async (req, res) => {
   try {
@@ -371,6 +359,139 @@ app.post("/ourproduct/create", upload.single("img"), async (req, res) => {
   } catch (error) {
     console.error("Item creation error:", error);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+//Get all Our Product
+app.get("/ourproduct", async (req, res) => {
+  try {
+    const [results] = await pool.query("SELECT * FROM our_product WHERE stt = 1");
+    
+    const modifiedResults = results.map(product => ({
+      ...product,
+      img: product.img 
+        ? `${req.protocol}://${req.get('host')}/uploads/${product.img.split('/').pop().split('\\').pop()}`
+        : null
+    }));
+
+    res.status(200).json(modifiedResults);
+  } catch (error) {
+    console.error("Error fetching data from the database:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to retrieve records", details: error.message });
+  }
+});
+
+// Get one Our Product
+app.get("/ourproduct/view/:id", async (req, res) => {
+  const { id } = req.params; // Extract the 'id' from the request parameters
+
+  try {
+    // Use parameterized query to prevent SQL injection
+    const [results] = await pool.query(
+      "SELECT * FROM our_product WHERE our_product_id = ? AND stt = 1",
+      [id]
+    );
+
+    if (results.length > 0) {
+      const product = results[0];
+      const modifiedProduct = {
+        ...product,
+        img: product.img 
+          ? `${req.protocol}://${req.get('host')}/uploads/${product.img.split('/').pop().split('\\').pop()}`
+          : null
+      };
+
+      res.status(200).json(modifiedProduct); // Send the modified product as a response
+    } else {
+      res.status(404).json({ message: "Product not found" }); // If no product is found, return 404
+    }
+  } catch (error) {
+    console.error("Error fetching product by ID:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to retrieve record", details: error.message });
+  }
+});
+
+//Update Our Product
+app.put("/ourproduct/update/:id", upload.single("img"), async (req, res) => {
+  const { id } = req.params; // Extract the 'id' from the request parameters
+  const { title, desc } = req.body; // Extract the product details from the request body
+
+  try {
+    // First, get the current product data
+    const [currentProduct] = await pool.query(
+      "SELECT img FROM our_product WHERE our_product_id = ?",
+      [id]
+    );
+
+    if (currentProduct.length === 0) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    let imgPath = currentProduct[0].img; // Default to current image path
+
+    if (req.file) {
+      console.log("New file uploaded:", req.file);
+      
+      // Delete the old image if it exists
+      if (imgPath) {
+        try {
+          await fs.unlink(path.join(__dirname, imgPath));
+          console.log("Old image deleted:", imgPath);
+        } catch (err) {
+          console.error("Error deleting old image:", err);
+          // Continue with the update even if old image deletion fails
+        }
+      }
+      
+      imgPath = req.file.path; // Update imgPath with new file path
+    }
+
+    // Update the product in the database
+    const [result] = await pool.query(
+      "UPDATE our_product SET img = ?, title = ?, `desc` = ?, updated_at = CURRENT_TIMESTAMP WHERE our_product_id = ?",
+      [imgPath, title, desc, id]
+    );
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "Product updated successfully" });
+    } else {
+      res.status(404).json({ message: "Product not found" });
+    }
+  } catch (error) {
+    console.error("Error updating product by ID:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to update record", details: error.message });
+  }
+});
+
+//Delete Our product
+//Delete one List Task
+app.put("/ourproduct/del/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await pool.query(
+      "UPDATE our_product SET stt = 0, updated_at = CURRENT_TIMESTAMP WHERE our_product_id = ?",
+      [id]
+    );
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "stt field updated successfully" });
+    } else {
+      res.status(404).json({ message: "Record not found" });
+    }
+  } catch (error) {
+    console.error("Error updating stt field by ID:", error);
+    res.status(500).json({ 
+      error: "Failed to update stt field", 
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

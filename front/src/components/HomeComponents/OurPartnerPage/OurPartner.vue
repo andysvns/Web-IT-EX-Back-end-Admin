@@ -22,7 +22,6 @@
                                 @error="() => handleImageError(item)"></v-img>
                         </td>
                         <td class="title-td">{{ item.title }}</td>
-                        <td class="desc-td">{{ item.desc }}</td>
                         <td class="action-td">
                             <v-btn text small @click="editItem(item)">
                                 <v-icon color="secondary">mdi-pencil-outline</v-icon>
@@ -93,7 +92,6 @@ export default {
                     sortable: false,
                 },
                 { text: "Title", value: "title", align: "center" },
-                { text: "Description", value: "description", align: "center" },
                 { text: "Actions", value: "actions", sortable: false, align: "center" },
             ],
             dialog: false, // Controls the dialog visibility

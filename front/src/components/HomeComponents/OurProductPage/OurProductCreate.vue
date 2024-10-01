@@ -21,10 +21,10 @@
                         <v-card-text>
                             <input type="file" ref="fileInput" accept="image/*" style="display: none"
                                 @change="handleImageUpload">
-                            <v-btn color="primary" @click="$refs.fileInput.click()">
+                            <v-btn color="secondary" @click="$refs.fileInput.click()">
                                 Upload Image
                             </v-btn>
-                            <v-img :src="displayedImageUrl" max-height="200" contain class="mt-4"></v-img>
+                            <v-img :src="displayedImageUrl" max-height="200" contain class="mt-6"></v-img>
                         </v-card-text>
                     </v-card>
                 </v-col>

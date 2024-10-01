@@ -28,7 +28,7 @@
               <v-card-title>List Detail</v-card-title>
               <v-card-text>
                 <v-text-field label="Title" :rules="titleRules" v-model="item.title" outlined></v-text-field>
-                <v-textarea label="Description" :rules="descRules" v-model="item.desc" rows="8" outlined></v-textarea>
+                <v-textarea label="Description" :rules="descRules" v-model="item.desc" rows="10" outlined></v-textarea>
               </v-card-text>
             </v-card>
           </v-col>
