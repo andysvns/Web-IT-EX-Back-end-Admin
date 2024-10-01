@@ -32,7 +32,7 @@
                 </v-col>
                 <v-col cols="12" md="7">
                     <v-card>
-                        <v-card-title>List Detail</v-card-title>
+                        <v-card-title> Detail</v-card-title>
                         <v-card-text>
                             <v-text-field label="Title" :rules="titleRules" v-model="item.title"
                                 outlined></v-text-field>

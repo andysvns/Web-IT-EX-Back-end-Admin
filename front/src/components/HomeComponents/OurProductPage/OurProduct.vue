@@ -18,7 +18,7 @@
                         <td class="text-center">{{ index + 1 }}</td>
                         <td class="img-td">
                             <v-img :src="item.img || require('@/assets/default.png')"
-                                :lazy-src="require('@/assets/default.png')" max-height="40" contain
+                                :lazy-src="require('@/assets/default.png')" max-height="100" contain
                                 @error="() => handleImageError(item)"></v-img>
                         </td>
                         <td class="title-td">{{ item.title }}</td>
@@ -227,15 +227,13 @@ export default {
     display: flex;
     align-items: center;
 }
+td{
+    min-height: 100px;
+}
 
 .img-td {
     
     max-width: 100px;
-}
-
-.img-td .v-img {
-    /* width: 50px; */
-    height: auto;
 }
 
 ::v-deep .v-data-table-header th {

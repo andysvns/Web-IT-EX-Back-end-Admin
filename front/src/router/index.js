@@ -74,6 +74,24 @@ const routes = [
     component: () => import("../components/HomeComponents/OurProductPage/OurProductEdit.vue"),
     meta: { title: 'Our Product Edit' ,requiresAuth: true }
   },
+  {
+    path: "/ourpartner",
+    name: "OurPartner",
+    component: () => import("../components/HomeComponents/OurPartnerPage/OurPartner.vue"),
+    meta: { title: 'Our Partner' ,requiresAuth: true }
+  },
+  {
+    path: "/ourpartner/create",
+    name: "OurPartnerCreate",
+    component: () => import("../components/HomeComponents/OurPartnerPage/OurPartnerCreate.vue"),
+    meta: { title: 'Our Partner Create' ,requiresAuth: true }
+  },
+  {
+    path: "/ourpartner/edit/:id",
+    name: "OurPartnerEdit",
+    component: () => import("../components/HomeComponents/OurPartnerPage/OurPartnerEdit.vue"),
+    meta: { title: 'Our Partner Edit' ,requiresAuth: true }
+  },
 
 
   {

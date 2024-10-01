@@ -18,10 +18,10 @@
                         <td class="text-center">{{ index + 1 }}</td>
                         <td class="img-td">
                             <v-img :src="item.img || require('@/assets/default.png')"
-                                :lazy-src="require('@/assets/default.png')" max-height="40" contain
+                                :lazy-src="require('@/assets/default.png')" max-height="60" contain
                                 @error="() => handleImageError(item)"></v-img>
                         </td>
-                        <td class="title-td">{{ item.title }}</td>
+                        <td class="title-td">{{ item.partner_name }}</td>
                         <td class="action-td">
                             <v-btn text small @click="editItem(item)">
                                 <v-icon color="secondary">mdi-pencil-outline</v-icon>
@@ -91,7 +91,7 @@ export default {
                     align: "center",
                     sortable: false,
                 },
-                { text: "Title", value: "title", align: "center" },
+                { text: "Partner name", value: "partner_name", align: "center" },
                 { text: "Actions", value: "actions", sortable: false, align: "center" },
             ],
             dialog: false, // Controls the dialog visibility
@@ -107,7 +107,7 @@ export default {
         async fetchData() {
             this.loading = true;
             try {
-                const response = await axios.get("http://localhost:3000/ourproduct", {
+                const response = await axios.get("http://localhost:3000/ourpartner", {
                     timeout: 10000,
                 });
                 this.items = Array.isArray(response.data)
@@ -123,12 +123,12 @@ export default {
             }
         },
         addNewItem() {
-            this.$router.push({ name: "OurProductCreate" });
+            this.$router.push({ name: "OurPartnerCreate" });
         },
         editItem(item) {
             this.$router.push({
-                name: "OurProductEdit",
-                params: { id: item.our_product_id },
+                name: "OurPartnerEdit",
+                params: { id: item.our_partner_id },
             });
         },
         // Opens the dialog and sets the item to delete
@@ -156,7 +156,7 @@ export default {
             this.loading = true;
             try {
                 const response = await axios.put(
-                    `http://localhost:3000/ourproduct/del/${this.itemToDelete.our_product_id}`
+                    `http://localhost:3000/ourpartner/del/${this.itemToDelete.our_partner_id}`
                 );
                 if (response.status === 200) {
                     this.snackbarSuccess = true;
@@ -174,8 +174,8 @@ export default {
         },
         handleImageError(item) {
             console.error("Image failed to load for item:", {
-                our_product_id: item.our_product_id,
-                title: item.title,
+                our_product_id: item.our_partner_id,
+                partner_name: item.partner_name,
                 img: item.img,
             });
 
@@ -225,16 +225,15 @@ export default {
     display: flex;
     align-items: center;
 }
-
+td{
+    min-height: 80px;
+}
 .img-td {
     
     max-width: 100px;
 }
 
-.img-td .v-img {
-    /* width: 50px; */
-    height: auto;
-}
+
 
 ::v-deep .v-data-table-header th {
     font-weight: 900;

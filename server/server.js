@@ -3,6 +3,7 @@ const mysql = require("mysql2/promise");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
 require("dotenv").config();
+const fs = require('fs').promises;
 const jwt = require("jsonwebtoken");
 
 const multer = require("multer");
@@ -19,10 +20,10 @@ const path = require("path");
 // });
 
 const storage = multer.diskStorage({
-  destination: './uploads',
+  destination: "./uploads",
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
-  }
+  },
 });
 
 // Initialize multer with the defined storage
@@ -31,7 +32,7 @@ const upload = multer({
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   },
-  limits: { fileSize: 10000000 } // 10MB limit
+  limits: { fileSize: 10000000 }, // 10MB limit
 });
 
 function checkFileType(file, cb) {
@@ -45,15 +46,14 @@ function checkFileType(file, cb) {
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    cb('Error: Images Only!');
+    cb("Error: Images Only!");
   }
 }
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
-
+app.use("/uploads", express.static("uploads"));
 
 // Database connection
 const pool = mysql.createPool({
@@ -221,15 +221,15 @@ app.post("/listtask/create", async (req, res) => {
       [icon, title, desc, created_at, updated_at, stt]
     );
 
-    console.log("Task creation successful for title:", title);
+    console.log("Item creation successful for title:", title);
 
     res.json({
       success: true,
-      message: "Task created successfully",
+      message: "Item created successfully",
       taskId: result.insertId,
     });
   } catch (error) {
-    console.error("Task creation error:", error);
+    console.error("Item creation error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
@@ -284,12 +284,12 @@ app.put("/listtask/update/:id", async (req, res) => {
     );
 
     if (result.affectedRows > 0) {
-      res.status(200).json({ message: "Contact updated successfully" }); // Respond with success if a record was updated
+      res.status(200).json({ message: "Item updated successfully" }); // Respond with success if a record was updated
     } else {
-      res.status(404).json({ message: "Contact not found" }); // If no record was updated, return 404
+      res.status(404).json({ message: "Item not found" }); // If no record was updated, return 404
     }
   } catch (error) {
-    console.error("Error updating contact by ID:", error);
+    console.error("Error updating Item by ID:", error);
     res
       .status(500)
       .json({ error: "Failed to update record", details: error.message });
@@ -313,10 +313,10 @@ app.put("/listtask/del/:id", async (req, res) => {
     }
   } catch (error) {
     console.error("Error updating stt field by ID:", error);
-    res.status(500).json({ 
-      error: "Failed to update stt field", 
+    res.status(500).json({
+      error: "Failed to update stt field",
       details: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 });
@@ -328,7 +328,9 @@ app.post("/ourproduct/create", upload.single("img"), async (req, res) => {
     console.log("Item creation attempt for title:", title);
 
     if (!title) {
-      return res.status(400).json({ success: false, message: "Title is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Title is required" });
     }
 
     let imgPath = null;
@@ -365,13 +367,19 @@ app.post("/ourproduct/create", upload.single("img"), async (req, res) => {
 //Get all Our Product
 app.get("/ourproduct", async (req, res) => {
   try {
-    const [results] = await pool.query("SELECT * FROM our_product WHERE stt = 1");
-    
-    const modifiedResults = results.map(product => ({
+    const [results] = await pool.query(
+      "SELECT * FROM our_product WHERE stt = 1"
+    );
+
+    const modifiedResults = results.map((product) => ({
       ...product,
-      img: product.img 
-        ? `${req.protocol}://${req.get('host')}/uploads/${product.img.split('/').pop().split('\\').pop()}`
-        : null
+      img: product.img
+        ? `${req.protocol}://${req.get("host")}/uploads/${product.img
+            .split("/")
+            .pop()
+            .split("\\")
+            .pop()}`
+        : null,
     }));
 
     res.status(200).json(modifiedResults);
@@ -398,17 +406,21 @@ app.get("/ourproduct/view/:id", async (req, res) => {
       const product = results[0];
       const modifiedProduct = {
         ...product,
-        img: product.img 
-          ? `${req.protocol}://${req.get('host')}/uploads/${product.img.split('/').pop().split('\\').pop()}`
-          : null
+        img: product.img
+          ? `${req.protocol}://${req.get("host")}/uploads/${product.img
+              .split("/")
+              .pop()
+              .split("\\")
+              .pop()}`
+          : null,
       };
 
       res.status(200).json(modifiedProduct); // Send the modified product as a response
     } else {
-      res.status(404).json({ message: "Product not found" }); // If no product is found, return 404
+      res.status(404).json({ message: "Item not found" }); // If no product is found, return 404
     }
   } catch (error) {
-    console.error("Error fetching product by ID:", error);
+    console.error("Error fetching Item by ID:", error);
     res
       .status(500)
       .json({ error: "Failed to retrieve record", details: error.message });
@@ -428,14 +440,14 @@ app.put("/ourproduct/update/:id", upload.single("img"), async (req, res) => {
     );
 
     if (currentProduct.length === 0) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: "Item not found" });
     }
 
     let imgPath = currentProduct[0].img; // Default to current image path
 
     if (req.file) {
       console.log("New file uploaded:", req.file);
-      
+
       // Delete the old image if it exists
       if (imgPath) {
         try {
@@ -446,7 +458,7 @@ app.put("/ourproduct/update/:id", upload.single("img"), async (req, res) => {
           // Continue with the update even if old image deletion fails
         }
       }
-      
+
       imgPath = req.file.path; // Update imgPath with new file path
     }
 
@@ -457,9 +469,9 @@ app.put("/ourproduct/update/:id", upload.single("img"), async (req, res) => {
     );
 
     if (result.affectedRows > 0) {
-      res.status(200).json({ message: "Product updated successfully" });
+      res.status(200).json({ message: "Item updated successfully" });
     } else {
-      res.status(404).json({ message: "Product not found" });
+      res.status(404).json({ message: "Item not found" });
     }
   } catch (error) {
     console.error("Error updating product by ID:", error);
@@ -470,7 +482,6 @@ app.put("/ourproduct/update/:id", upload.single("img"), async (req, res) => {
 });
 
 //Delete Our product
-//Delete one List Task
 app.put("/ourproduct/del/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -487,14 +498,173 @@ app.put("/ourproduct/del/:id", async (req, res) => {
     }
   } catch (error) {
     console.error("Error updating stt field by ID:", error);
-    res.status(500).json({ 
-      error: "Failed to update stt field", 
+    res.status(500).json({
+      error: "Failed to update stt field",
       details: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 });
 
+//Create Our Partner
+app.post("/ourpartner/create", upload.single("img"), async (req, res) => {
+  try {
+    const { partner_name } = req.body;
+    console.log("Item creation attempt for parter name:", partner_name);
+
+    if (!partner_name) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Name is required" });
+    }
+
+    let imgPath = null;
+    if (req.file) {
+      console.log("Uploaded file:", req.file);
+      imgPath = req.file.path;
+    } else {
+      console.log("No file uploaded");
+    }
+
+    const created_at = new Date();
+    const updated_at = new Date();
+    const stt = 1;
+
+    // Insert the new product into the database
+    const [result] = await pool.execute(
+      "INSERT INTO our_partner (img, partner_name, created_at, updated_at, stt) VALUES (?, ?, ?, ?, ?)",
+      [imgPath, partner_name, created_at, updated_at, stt]
+    );
+
+    console.log("Item creation successful for partner name:", partner_name);
+
+    res.json({
+      success: true,
+      message: "Item created successfully",
+      taskId: result.insertId,
+    });
+  } catch (error) {
+    console.error("Item creation error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+//Get all Our Partner
+app.get("/ourpartner", async (req, res) => {
+  try {
+    const [results] = await pool.query(
+      "SELECT * FROM our_partner WHERE stt = 1"
+    );
+
+    const modifiedResults = results.map((items) => ({
+      ...items,
+      img: items.img
+        ? `${req.protocol}://${req.get("host")}/uploads/${items.img
+            .split("/")
+            .pop()
+            .split("\\")
+            .pop()}`
+        : null,
+    }));
+
+    res.status(200).json(modifiedResults);
+  } catch (error) {
+    console.error("Error fetching data from the database:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to retrieve records", details: error.message });
+  }
+});
+
+// Get one Our Partner
+app.get("/ourpartner/view/:id", async (req, res) => {
+  const { id } = req.params; // Extract the 'id' from the request parameters
+
+  try {
+    // Use parameterized query to prevent SQL injection
+    const [results] = await pool.query(
+      "SELECT * FROM our_partner WHERE our_partner_id = ? AND stt = 1",
+      [id]
+    );
+
+    if (results.length > 0) {
+      const item = results[0];
+      const modifiedProduct = {
+        ...item,
+        img: item.img
+          ? `${req.protocol}://${req.get("host")}/uploads/${item.img
+              .split("/")
+              .pop()
+              .split("\\")
+              .pop()}`
+          : null,
+      };
+
+      res.status(200).json(modifiedProduct); // Send the modified product as a response
+    } else {
+      res.status(404).json({ message: "Item not found" }); // If no partner is found, return 404
+    }
+  } catch (error) {
+    console.error("Error fetching item by ID:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to retrieve record", details: error.message });
+  }
+});
+
+//Update Our Partner
+app.put("/ourpartner/update/:id", upload.single("img"), async (req, res) => {
+  const { id } = req.params; // Extract the 'id' from the request parameters
+  const { partner_name } = req.body; // Extract the product details from the request body
+
+  try {
+    // First, get the current product data
+    const [currentItem] = await pool.query(
+      "SELECT img FROM our_partner WHERE our_partner_id = ?",
+      [id]
+    );
+
+    if (currentItem.length === 0) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    let imgPath = currentItem[0].img; // Default to current image path
+
+    if (req.file) {
+      console.log("New file uploaded:", req.file);
+
+      // Delete the old image if it exists
+      if (imgPath) {
+        try {
+          await fs.unlink(path.join(__dirname, imgPath));
+          console.log("Old image deleted:", imgPath);
+        } catch (err) {
+          console.error("Error deleting old image:", err);
+          // Continue with the update even if old image deletion fails
+        }
+      }
+
+      imgPath = req.file.path; // Update imgPath with new file path
+    }
+
+    // Update the partner in the database
+    const [result] = await pool.query(
+      "UPDATE our_partner SET img = ?, partner_name = ?, updated_at = CURRENT_TIMESTAMP WHERE our_partner_id = ?",
+      [imgPath, partner_name, id]
+    );
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "Partner updated successfully" });
+    } else {
+      res.status(404).json({ message: "Pnarter not found" });
+    }
+  } catch (error) {
+    console.error("Error updating partner by ID:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to update record", details: error.message });
+  }
+});
 
 // Get All Contact
 app.get("/contact", async (req, res) => {
@@ -506,6 +676,31 @@ app.get("/contact", async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to retrieve records", details: error.message });
+  }
+});
+
+//Delete Our product
+app.put("/ourpartner/del/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await pool.query(
+      "UPDATE our_partner SET stt = 0, updated_at = CURRENT_TIMESTAMP WHERE our_partner_id = ?",
+      [id]
+    );
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "stt field updated successfully" });
+    } else {
+      res.status(404).json({ message: "Record not found" });
+    }
+  } catch (error) {
+    console.error("Error updating stt field by ID:", error);
+    res.status(500).json({
+      error: "Failed to update stt field",
+      details: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
   }
 });
 
