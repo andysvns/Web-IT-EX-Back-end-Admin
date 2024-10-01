@@ -36,6 +36,7 @@ const routes = [
     component: () => import("../components/HomePage.vue"),
     meta: { title: 'Home Page' ,requiresAuth: true }
   },
+
   {
     path: "/listtask",
     name: "ListTask",
@@ -46,14 +47,34 @@ const routes = [
     path: "/listtask/create",
     name: "ListTaskCreate",
     component: () => import("../components/HomeComponents/ListTaskPage/ListTaskCreate.vue"),
-    meta: { title: 'List Task' ,requiresAuth: true }
+    meta: { title: 'List Task Create' ,requiresAuth: true }
   },
   {
     path: "/listtask/edit/:id",
     name: "ListTaskEdit",
     component: () => import("../components/HomeComponents/ListTaskPage/ListTaskEdit.vue"),
-    meta: { title: 'List Task' ,requiresAuth: true }
+    meta: { title: 'List Task Edit' ,requiresAuth: true }
   },
+
+  {
+    path: "/ourproduct",
+    name: "OurProduct",
+    component: () => import("../components/HomeComponents/OurProductPage/OurProduct.vue"),
+    meta: { title: 'Our Product' ,requiresAuth: true }
+  },
+  {
+    path: "/ourproduct/create",
+    name: "OurProductCreate",
+    component: () => import("../components/HomeComponents/OurProductPage/OurProductCreate.vue"),
+    meta: { title: 'Our Product Create' ,requiresAuth: true }
+  },
+  {
+    path: "/ourproduct/edit/:id",
+    name: "OurProductEdit",
+    component: () => import("../components/HomeComponents/OurProductPage/OurProductEdit.vue"),
+    meta: { title: 'Our Product Edit' ,requiresAuth: true }
+  },
+
 
   {
     path: "/contact",

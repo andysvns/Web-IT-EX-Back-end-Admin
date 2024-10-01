@@ -149,7 +149,8 @@
           iconColor: 'white',
           subitems: [
             { title: 'Background', path: '/homepage' },
-            { title: 'List Task', path: '/listtask' }
+            { title: 'List Task', path: '/listtask' },
+            { title: 'Our Product', path: '/ourproduct' },
           ]
           },
           { 

@@ -22,7 +22,7 @@
                                 {{ item.icon }}
                             </v-icon>
                         </td>
-                        <td class="number-td">{{ item.icon }}</td>
+                        <td class="icon-text-td">{{ item.icon }}</td>
                         <td class="title-td">{{ item.title }}</td>
                         <td class="desc-td">{{ item.desc }}</td>
                         <td class="action-td">
@@ -32,8 +32,17 @@
                             <v-btn text small @click="confirmDelete(item)">
                                 <v-icon color="#EA2A2D">mdi-delete</v-icon>
                             </v-btn>
-                            <!-- Confirmation Dialog -->
-                            <v-dialog v-model="dialog" max-width="400">
+                           
+
+ 
+
+                        </td>
+                    </tr>
+                </template>
+            </v-data-table>
+
+             <!-- Confirmation Dialog -->
+             <v-dialog v-model="dialog" max-width="400">
                                 <v-card>
                                     <v-card-title class="headline">Are you sure?</v-card-title>
                                     <v-card-text>
@@ -59,11 +68,6 @@
                                 Failed to delete item. Please try again.
                                 <v-btn color="white" text @click="snackbarError = false">Close</v-btn>
                             </v-snackbar>
-
-                        </td>
-                    </tr>
-                </template>
-            </v-data-table>
         </v-card>
 
     </v-container>
@@ -103,14 +107,17 @@ export default {
     },
     methods: {
         async fetchData() {
+            this.loading = true;
             try {
-                const response = await axios.get('http://localhost:3000/listtask');
+                const response = await axios.get('http://localhost:3000/listtask', {
+                    timeout: 10000 // 10 seconds timeout
+                });
                 this.items = Array.isArray(response.data) ? response.data : [response.data];
-                this.loading = false;
             } catch (err) {
-                this.error = 'Failed to fetch contact information: ' + err.message;
-                this.loading = false;
                 console.error('Error fetching data:', err);
+                this.error = 'Failed to fetch list task information: ' + (err.response?.data?.message || err.message);
+            } finally {
+                this.loading = false;
             }
         },
         addNewItem() {
@@ -123,30 +130,39 @@ export default {
         confirmDelete(item) {
             this.itemToDelete = item;
             this.dialog = true;
+            this.$nextTick(() => {
+                // Focus on the cancel button when the dialog opens
+                if (this.$refs.cancelBtn) {
+                    this.$refs.cancelBtn.$el.focus();
+                }
+            });
         },
-        // Closes the confirmation dialog
         closeDialog() {
             this.dialog = false;
+            this.itemToDelete = null;
         },
         async deleteItem() {
+            if (!this.itemToDelete) {
+                console.error('No item selected for deletion');
+                this.closeDialog();
+                return;
+            }
+
+            this.loading = true;
             try {
-                // Perform the DELETE request to the API
                 const response = await axios.put(`http://localhost:3000/listtask/del/${this.itemToDelete.list_task_id}`);
-
                 if (response.status === 200) {
-                    // Assuming deletion is successful:
-                    this.dialog = false;
-                    this.snackbarSuccess = true; // Show success snackbar
-
-                    // Refetch the data after successful deletion
+                    this.snackbarSuccess = true;
                     await this.fetchData();
                 } else {
-                    console.error("Failed to delete item", response);
-                    this.snackbarError = true; // Show error snackbar if delete fails
+                    throw new Error('Unexpected response status');
                 }
             } catch (error) {
                 console.error("Error during deletion:", error);
-                this.snackbarError = true; // Show error snackbar on error
+                this.snackbarError = true;
+            } finally {
+                this.loading = false;
+                this.closeDialog();
             }
         },
     },

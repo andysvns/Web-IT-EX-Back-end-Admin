@@ -5,6 +5,43 @@ const cors = require("cors");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
+const multer = require("multer");
+const path = require("path");
+
+// Configure storage for uploaded files
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/') // Make sure this directory exists
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)) // Appending extension
+  }
+});
+
+// Initialize multer with the defined storage
+const upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    checkFileType(file, cb);
+  },
+  limits: { fileSize: 10000000 } // 10MB limit
+});
+
+function checkFileType(file, cb) {
+  // Allowed extensions
+  const filetypes = /jpeg|jpg|png|gif/;
+  // Check extension
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  // Check mime
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb('Error: Images Only!');
+  }
+}
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -252,27 +289,91 @@ app.put("/listtask/update/:id", async (req, res) => {
 
 //Delete one List Task
 app.put("/listtask/del/:id", async (req, res) => {
-  const { id } = req.params; // Extract the 'id' from the request parameters
+  const { id } = req.params;
 
   try {
-    // Use parameterized query to update the 'stt' field, preventing SQL injection
     const [result] = await pool.query(
       "UPDATE list_task SET stt = 0, updated_at = CURRENT_TIMESTAMP WHERE list_task_id = ?",
       [id]
     );
 
     if (result.affectedRows > 0) {
-      res.status(200).json({ message: "stt field updated successfully" }); // Respond with success if a record was updated
+      res.status(200).json({ message: "stt field updated successfully" });
     } else {
-      res.status(404).json({ message: "Record not found" }); // If no record was updated, return 404
+      res.status(404).json({ message: "Record not found" });
     }
   } catch (error) {
     console.error("Error updating stt field by ID:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to update stt field", details: error.message });
+    res.status(500).json({ 
+      error: "Failed to update stt field", 
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
+
+//Get all Our Product
+
+app.get("/ourproduct", async (req, res) => {
+  try {
+    const [results] = await pool.query("SELECT * FROM our_product WHERE stt = 1");
+    
+    // Modify the image paths to include the full URL
+    const modifiedResults = results.map(product => ({
+      ...product,
+      img: product.img ? `${req.protocol}://${req.get('host')}${product.img}` : null
+    }));
+
+    res.status(200).json(modifiedResults);
+  } catch (error) {
+    console.error("Error fetching data from the database:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to retrieve records", details: error.message });
+  }
+});
+
+//Create Our Product
+app.post("/ourproduct/create", upload.single("img"), async (req, res) => {
+  try {
+    const { title, desc } = req.body;
+    console.log("Item creation attempt for title:", title);
+
+    if (!title) {
+      return res.status(400).json({ success: false, message: "Title is required" });
+    }
+
+    let imgPath = null;
+    if (req.file) {
+      console.log("Uploaded file:", req.file);
+      imgPath = req.file.path;
+    } else {
+      console.log("No file uploaded");
+    }
+
+    const created_at = new Date();
+    const updated_at = new Date();
+    const stt = 1;
+
+    // Insert the new product into the database
+    const [result] = await pool.execute(
+      "INSERT INTO our_product (img, title, `desc`, created_at, updated_at, stt) VALUES (?, ?, ?, ?, ?, ?)",
+      [imgPath, title, desc, created_at, updated_at, stt]
+    );
+
+    console.log("Item creation successful for title:", title);
+
+    res.json({
+      success: true,
+      message: "Item created successfully",
+      taskId: result.insertId,
+    });
+  } catch (error) {
+    console.error("Item creation error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 
 // Get All Contact
 app.get("/contact", async (req, res) => {
