@@ -115,7 +115,7 @@ export default {
             }
 
             try {
-                const response = await axios.post('http://localhost:3000/ourpartner/create', formData, {
+                const response = await axios.post('http://localhost:3000/api/partners/create', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }

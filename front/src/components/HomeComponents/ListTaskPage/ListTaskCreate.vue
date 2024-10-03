@@ -92,7 +92,7 @@ export default {
       this.item.created_at = new Date().toISOString();
       this.item.updated_at = new Date().toISOString();
       try {
-        const response = await axios.post('http://localhost:3000/listtask/create/', this.item);
+        const response = await axios.post('http://localhost:3000/api/listtask/create/', this.item);
         if (response.status === 200) {
           this.$emit('item-created', response.data);
           this.snackbarSuccess = true; // Show success snackbar

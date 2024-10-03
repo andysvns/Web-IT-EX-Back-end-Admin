@@ -107,7 +107,7 @@ export default {
       this.loading = true;
       this.errorMessage = "";
       try {
-        const response = await axios.post("http://localhost:3000/login", {
+        const response = await axios.post("http://localhost:3000/authen/login", {
           username: this.username,
           password: this.password,
         });
