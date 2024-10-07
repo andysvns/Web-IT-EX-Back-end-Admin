@@ -63,8 +63,8 @@ export default {
   },
   computed: {
     formattedDesc() {
-      return this.item.desc.replace(/\n/g, '<br>');
-    }
+      return this.item.desc.replace(/\n/g, "<br>");
+    },
   },
   mounted() {
     this.fetchData();
@@ -93,10 +93,10 @@ export default {
       }
     },
     editItem() {
-      if (this.item.about_us_id) {
+      if (this.item.intro_id) {
         this.$router.push({
           name: "IntroEdit",
-          params: { id: this.item.about_us_id },
+          params: { id: this.item.intro_id },
         });
       } else {
         console.error("No about_us_id available for editing");

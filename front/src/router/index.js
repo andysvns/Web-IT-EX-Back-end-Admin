@@ -134,6 +134,29 @@ const routes = [
       import("../components/HomeComponents/OurPartnerPage/OurPartnerEdit.vue"),
     meta: { title: "Our Partner Edit", requiresAuth: true },
   },
+  {
+    path: "/stacktools",
+    name: "StackTools",
+    component: () =>
+      import("../components/HomeComponents/StackToolsPage/StackTools.vue"),
+    meta: { title: "Stack & Tools", requiresAuth: true },
+  },
+  {
+    path: "/stacktools/create",
+    name: "StackToolsCreate",
+    component: () =>
+      import(
+        "../components/HomeComponents/StackToolsPage/StackToolsCreate.vue"
+      ),
+    meta: { title: "Tools Create", requiresAuth: true },
+  },
+  {
+    path: "/stacktools/edit/:id",
+    name: "StackToolsEdit",
+    component: () =>
+      import("../components/HomeComponents/StackToolsPage/StackToolsEdit.vue"),
+    meta: { title: "Tool Edit", requiresAuth: true },
+  },
 
   {
     path: "/ourproduct",
@@ -193,14 +216,38 @@ const routes = [
   {
     path: "/contact",
     name: "ContactPage",
-    component: () => import("../components/ContactPage/Contact_admin.vue"),
+    component: () =>
+      import("../components/ContactPage/ContactUs/Contact_admin.vue"),
     meta: { title: "Contact", requiresAuth: true },
   },
   {
     path: "/contact/edit/:id",
     name: "ContactEdit",
-    component: () => import("../components/ContactPage/ContactEdit.vue"),
+    component: () =>
+      import("../components/ContactPage/ContactUs/ContactEdit.vue"),
     meta: { title: "Contact Edit", requiresAuth: true },
+  },
+
+  {
+    path: "/social",
+    name: "Social",
+    component: () =>
+      import("../components/ContactPage/SocialContactPage/SocialUrl.vue"),
+    meta: { title: "Social", requiresAuth: true },
+  },
+  {
+    path: "/social/create",
+    name: "SocialCreate",
+    component: () =>
+      import("../components/ContactPage/SocialContactPage/SocialUrlCreate.vue"),
+    meta: { title: "Social Create", requiresAuth: true },
+  },
+  {
+    path: "/social/edit/:id",
+    name: "SocialEdit",
+    component: () =>
+      import("../components/ContactPage/SocialContactPage/SocialurlEdit.vue"),
+    meta: { title: "Social Edit", requiresAuth: true },
   },
 ];
 

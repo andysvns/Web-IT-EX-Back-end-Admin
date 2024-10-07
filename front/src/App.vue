@@ -146,6 +146,7 @@ export default {
             { title: "List Task", path: "/listtask" },
             { title: "Impact Number", path: "/impact" },
             { title: "Our Partner", path: "/ourpartner" },
+            { title: "Our Stack & tools", path: "/stacktools" },
           ],
         },
         {
@@ -164,7 +165,10 @@ export default {
         {
           title: "Contact",
           icon: "mdi-contacts",
-          path: "/contact",
+          subitems: [
+            { title: "Contact Information", path: "/contact" },
+            { title: "Social", path: "/social" },
+          ],
         },
       ],
     };
