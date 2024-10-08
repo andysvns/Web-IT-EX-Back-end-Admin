@@ -159,12 +159,12 @@ export default {
         },
         {
           title: "Our Product",
-          icon: "mdi-cog-outline",
+          icon: "mdi-package-variant-closed",
           path: "/ourproduct",
         },
         {
           title: "Contact",
-          icon: "mdi-contacts",
+          icon: "mdi-phone",
           subitems: [
             { title: "Contact Information", path: "/contact" },
             { title: "Social", path: "/social" },

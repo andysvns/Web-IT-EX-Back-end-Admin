@@ -73,12 +73,12 @@
       <!-- Snackbar for deletion confirmation -->
       <v-snackbar v-model="snackbarSuccess" bottom right color="success">
         <v-icon color="white" left>mdi-check-circle</v-icon>
-        Item deleted successfully!
+        Member deleted successfully!
         <v-btn color="white" text @click="snackbarSuccess = false">Close</v-btn>
       </v-snackbar>
       <v-snackbar v-model="snackbarError" bottom right color="error">
         <v-icon color="white" left>mdi-alert-circle</v-icon>
-        Failed to delete item. Please try again.
+        Failed to delete member. Please try again.
         <v-btn color="white" text @click="snackbarError = false">Close</v-btn>
       </v-snackbar>
     </v-card>
@@ -205,15 +205,7 @@ export default {
         img: item.img,
       });
 
-      // Attempt to construct a corrected URL
       let correctedUrl = item.img;
-      // if (correctedUrl) {
-      //     // Remove multiple consecutive slashes
-      //     correctedUrl = correctedUrl.replace(/([^:]\/)\/+/g, "$1");
-      //     // Ensure there's exactly one slash after 'http://' or 'https://'
-      //     correctedUrl = correctedUrl.replace(/(https?:\/\/)\/*/g, "$1/");
-      //     console.log("Attempted corrected URL:", correctedUrl);
-      // }
 
       this.$set(item, "img", correctedUrl || require("@/assets/default.png"));
     },

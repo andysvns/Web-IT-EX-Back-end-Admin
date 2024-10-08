@@ -47,11 +47,24 @@
                 prepend-inner-icon="mdi-email"
               ></v-text-field>
 
+              <!-- Location -->
+              <v-textarea
+                v-model="contact.address"
+                :rules="locationRules"
+                label="Location"
+                outlined
+                rows="3"
+                placeholder="Please Enter"
+                required
+                :loading="loading"
+                :disabled="loading"
+                prepend-inner-icon="mdi-map-marker"
+              ></v-textarea>
               <!-- URL Address -->
               <v-textarea
                 v-model="contact.address_url"
                 :rules="urlRules"
-                label="Description"
+                label="Address URL"
                 outlined
                 placeholder="Please Enter"
                 required
@@ -61,19 +74,6 @@
                 :disabled="loading"
                 prepend-inner-icon="mdi-text-box"
               ></v-textarea>
-
-              <!-- Location -->
-              <v-text-field
-                v-model="contact.address"
-                :rules="locationRules"
-                label="Location"
-                outlined
-                placeholder="Please Enter"
-                required
-                :loading="loading"
-                :disabled="loading"
-                prepend-inner-icon="mdi-map-marker"
-              ></v-text-field>
             </v-form>
           </v-card-text>
         </v-card>
@@ -169,7 +169,9 @@ export default {
 
       this.loading = true;
       try {
-        const response = await axios.get(`http://localhost:3000/contact/${id}`);
+        const response = await axios.get(
+          `http://localhost:3000/api/contact/view/${id}`
+        );
         if (response.data) {
           this.contact = response.data;
         } else {
@@ -199,7 +201,7 @@ export default {
         };
 
         const response = await axios.put(
-          `http://localhost:3000/contact/update/${id}`,
+          `http://localhost:3000/api/contact/update/${id}`,
           updateData
         );
 

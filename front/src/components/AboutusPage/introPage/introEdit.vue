@@ -75,14 +75,14 @@
     <!-- Success snackbar -->
     <v-snackbar v-model="snackbarSuccess" bottom right color="success">
       <v-icon color="white" left>mdi-check-circle</v-icon>
-      Edited item successfully!
+      Intro Edited successfully!
       <v-btn color="white" text @click="snackbarSuccess = false">Close</v-btn>
     </v-snackbar>
 
     <!-- Error snackbar -->
     <v-snackbar v-model="snackbarError" bottom right color="error">
       <v-icon color="white" left>mdi-alert-circle</v-icon>
-      Failed to edit item. Please try again.
+      Failed to edit Intro. Please try again.
       <v-btn color="white" text @click="snackbarError = false">Close</v-btn>
     </v-snackbar>
   </v-container>

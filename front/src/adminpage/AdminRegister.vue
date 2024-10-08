@@ -80,7 +80,7 @@ export default {
             }
 
             try {
-                const response = await axios.post("http://localhost:3000/register", {
+                const response = await axios.post("http://localhost:3000/authen/register", {
                     username: this.username,
                     password: this.password,
                     confirmpassword: this.confirmPassword,

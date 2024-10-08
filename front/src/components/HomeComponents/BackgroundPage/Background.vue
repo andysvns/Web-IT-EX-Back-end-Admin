@@ -68,16 +68,14 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="validateAndUpdate"
-            >Save</v-btn
-          >
+          <v-btn color="red" text @click="closeDialog">Cancel</v-btn>
+          <v-btn color="green" text @click="validateAndUpdate">Save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- Snackbars -->
-    <v-snackbar v-model="snackbarSuccess" color="success" :timeout="3000">
+    <v-snackbar right v-model="snackbarSuccess" color="success" :timeout="3000">
       Item updated successfully!
       <template v-slot:action="{ attrs }">
         <v-btn text v-bind="attrs" @click="snackbarSuccess = false"
@@ -86,7 +84,7 @@
       </template>
     </v-snackbar>
 
-    <v-snackbar v-model="snackbarError" color="error" :timeout="3000">
+    <v-snackbar right v-model="snackbarError" color="error" :timeout="3000">
       Failed to update item. Please try again.
       <template v-slot:action="{ attrs }">
         <v-btn text v-bind="attrs" @click="snackbarError = false">Close</v-btn>
