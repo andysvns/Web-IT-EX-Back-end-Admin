@@ -16,9 +16,15 @@ axios.interceptors.request.use((config) => {
 
 const routes = [
   {
-    path: "/",
+    path: "/admin",
     name: "AdminPage",
-    component: () => import("../adminpage/Admin.vue"),
+    component: () => import("../adminpage/UserPage.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/usercreate",
+    name: "userCreate",
+    component: () => import("../adminpage/UserCreate.vue"),
     meta: { requiresAuth: true },
   },
   {
@@ -29,7 +35,7 @@ const routes = [
   {
     path: "/adminregister",
     name: "AdminRegister",
-    component: () => import("../adminpage/AdminRegister.vue"),
+    component: () => import("../adminpage/UserCreate.vue"),
   },
   {
     path: "/homepage",

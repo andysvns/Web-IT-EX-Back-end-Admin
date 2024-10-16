@@ -19,6 +19,10 @@
           style="max-width: 150px"
           @change="filterItems"
         ></v-select>
+        <!-- <v-btn text outlined @click="socialedit" class="ml-6">
+          Social
+          <v-icon right>mdi-pencil-outline</v-icon>
+        </v-btn> -->
         <v-spacer></v-spacer>
         <v-text-field
           v-model="search"
@@ -48,7 +52,7 @@
             <td class="title-td">{{ item.title }}</td>
             <td class="title-td">{{ item.social_url }}</td>
             <td class="action-td">
-              <v-btn text small @click="editItem(item)">
+              <v-btn class="mr-5" text small @click="editItem(item)">
                 <v-icon color="secondary">mdi-pencil-outline</v-icon>
               </v-btn>
               <v-btn text small @click="confirmDelete(item)">
@@ -59,8 +63,93 @@
         </template>
       </v-data-table>
 
+      <v-dialog v-model="dialog" max-width="500">
+        <v-card>
+          <v-card-title
+            class="headline d-flex justify-space-between align-center pa-4"
+          >
+            <v-btn icon @click="toggleView" color="primary">
+              <v-icon>{{ isAddView ? "mdi-arrow-left" : "mdi-plus" }}</v-icon>
+            </v-btn>
+            <v-spacer></v-spacer>
+            <span class="text-center">{{
+              isAddView ? "Add Social Type" : "Social Types"
+            }}</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+
+          <v-card-text class="pa-4">
+            <!-- List View -->
+            <v-row v-if="!isAddView" align="center" justify="start">
+              <v-col
+                v-for="(type, index) in socialTypes"
+                :key="index"
+                cols="4"
+                sm="3"
+                class="text-center"
+              >
+                <v-icon color="secondary" size="56" class="mb-2" dark>{{
+                  type.icon || "mdi-account"
+                }}</v-icon>
+                <div class="caption">
+                  <div>
+                    {{ type.s_type_name }}
+                  </div>
+                  <v-btn class="" text small @click="editItem(item)">
+                    <v-icon color="secondary">mdi-pencil-outline</v-icon>
+                  </v-btn>
+                </div>
+              </v-col>
+              <v-col
+                v-if="socialTypes.length === 0"
+                cols="12"
+                class="text-center"
+              >
+                <v-progress-circular
+                  indeterminate
+                  color="primary"
+                ></v-progress-circular>
+              </v-col>
+            </v-row>
+
+            <!-- Add Form View -->
+            <v-form v-else @submit.prevent="addNewItemType">
+              <v-text-field
+                v-model="newType.s_type_name"
+                label="Social Type Name"
+                required
+                :error-messages="nameError"
+              ></v-text-field>
+              <v-text-field
+                v-model="newType.icon"
+                label="Icon (e.g., mdi-facebook)"
+              ></v-text-field>
+              <v-icon size="78" color="secondary">{{
+                newType.icon || "mdi-help-circle"
+              }}</v-icon>
+              <v-btn
+                color="secondary"
+                type="submit"
+                block
+                class="mt-4"
+                :loading="isLoading"
+                :disabled="!newType.s_type_name"
+              >
+                Add Social Type
+              </v-btn>
+            </v-form>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" text @click="closeDialog">Close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
       <!-- Confirmation Dialog -->
-      <v-dialog v-model="dialog" max-width="400">
+      <!-- Delete Confirmation Dialog -->
+      <v-dialog v-model="deleteDialog" max-width="400">
         <v-card>
           <v-card-title class="headline">Are you sure?</v-card-title>
           <v-card-text>
@@ -71,7 +160,7 @@
             <v-btn
               color="green darken-1"
               text
-              @click="closeDialog"
+              @click="closeDeleteDialog"
               ref="cancelBtn"
               >Cancel</v-btn
             >
@@ -83,12 +172,12 @@
       <!-- Snackbars -->
       <v-snackbar v-model="snackbarSuccess" bottom right color="success">
         <v-icon color="white" left>mdi-check-circle</v-icon>
-        Item deleted successfully!
+        {{ snackbarMessage }}
         <v-btn color="white" text @click="snackbarSuccess = false">Close</v-btn>
       </v-snackbar>
       <v-snackbar v-model="snackbarError" bottom right color="error">
         <v-icon color="white" left>mdi-alert-circle</v-icon>
-        Failed to delete item. Please try again.
+        {{ errorMessage }}
         <v-btn color="white" text @click="snackbarError = false">Close</v-btn>
       </v-snackbar>
     </v-card>
@@ -116,14 +205,30 @@ export default {
         { text: "Actions", value: "actions", sortable: false, align: "center" },
       ],
       dialog: false,
+      deleteDialog: false,
+      confirmDialog: false, // for confirmation
+
+      isAddView: false,
+
+      socialTypes: [],
+      newType: {
+        s_type_name: "",
+        icon: "",
+      },
+      isLoading: false,
+      nameError: "",
       snackbarSuccess: false,
       snackbarError: false,
+      snackbarMessage: "",
+      showError: false,
+      errorMessage: "",
       itemToDelete: null,
     };
   },
   mounted() {
     this.fetchStackTypes();
     this.fetchData();
+    this.fetchSocialTypes();
   },
   methods: {
     async fetchStackTypes() {
@@ -181,42 +286,113 @@ export default {
     },
     confirmDelete(item) {
       this.itemToDelete = item;
-      this.dialog = true;
-      this.$nextTick(() => {
-        if (this.$refs.cancelBtn) {
-          this.$refs.cancelBtn.$el.focus();
-        }
-      });
+      this.deleteDialog = true;
     },
-    closeDialog() {
-      this.dialog = false;
+
+    closeDeleteDialog() {
+      this.deleteDialog = false;
       this.itemToDelete = null;
     },
     async deleteItem() {
       if (!this.itemToDelete) {
         console.error("No item selected for deletion");
-        this.closeDialog();
+        this.closeDeleteDialog();
         return;
       }
 
-      this.loading = true;
+      this.isLoading = true;
       try {
         const response = await axios.put(
           `http://localhost:3000/api/socialurl/del/${this.itemToDelete.social_url_id}`
         );
         if (response.status === 200) {
-          this.snackbarSuccess = true;
+          this.showSuccessMessage("Item deleted successfully!");
           await this.fetchData();
         } else {
           throw new Error("Unexpected response status");
         }
       } catch (error) {
         console.error("Error during deletion:", error);
-        this.snackbarError = true;
+        this.showErrorMessage("Failed to delete item. Please try again.");
       } finally {
-        this.loading = false;
-        this.closeDialog();
+        this.isLoading = false;
+        this.closeDeleteDialog();
       }
+    },
+
+    socialedit() {
+      this.dialog = true;
+    },
+    fetchSocialTypes() {
+      axios
+        .get("http://localhost:3000/api/socialtype/getall")
+        .then((response) => {
+          this.socialTypes = response.data;
+        })
+        .catch((error) => {
+          console.error("Error fetching social types:", error);
+          this.showErrorMessage("Failed to fetch social types");
+        });
+    },
+    toggleView() {
+      this.isAddView = !this.isAddView;
+      if (!this.isAddView) {
+        this.resetForm();
+      }
+    },
+    resetForm() {
+      this.newType = { s_type_name: "", icon: "" };
+      this.nameError = "";
+    },
+    closeDialog() {
+      this.dialog = false;
+      this.isAddView = false;
+      this.resetForm();
+    },
+    addNewItemType() {
+      if (!this.newType.s_type_name) {
+        this.nameError = "Name is required";
+        return;
+      }
+
+      this.isLoading = true;
+      this.nameError = "";
+
+      axios
+        .post("http://localhost:3000/api/socialtype/create", this.newType)
+        .then((response) => {
+          if (response.data.success) {
+            this.socialTypes.push({
+              id: response.data.taskId,
+              s_type_name: this.newType.s_type_name,
+              icon: this.newType.icon,
+            });
+            this.resetForm();
+            this.toggleView();
+            this.showSuccessMessage("Social type added successfully!");
+          } else {
+            this.showErrorMessage(
+              response.data.message || "Failed to add social type"
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Error adding social type:", error);
+          this.showErrorMessage(
+            error.response?.data?.message || "Error adding social type"
+          );
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
+    },
+    showSuccessMessage(message) {
+      this.snackbarMessage = message;
+      this.snackbarSuccess = true;
+    },
+    showErrorMessage(message) {
+      this.errorMessage = message;
+      this.snackbarError = true;
     },
   },
 };
@@ -243,7 +419,7 @@ export default {
 .action-td {
   height: inherit;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
 }
 

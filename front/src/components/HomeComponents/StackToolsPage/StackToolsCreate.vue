@@ -165,7 +165,7 @@
         this.snackbar.message = message;
       },
     },
-    created() {
+    mounted() {
       this.fetchStackTypes();
     },
   };

@@ -5,7 +5,7 @@
         v-model="outerDrawer"
         app
         class="side-bar-nav"
-        v-if="!isLoginPage && !isRegisterPage"
+        v-if="!isLoginPage"
       >
         <img class="logo" src="./assets/logo1.png" alt="" />
         <v-list nav>
@@ -51,16 +51,12 @@
         </v-list>
       </v-navigation-drawer>
 
-      <div class="top-navbar" v-if="!isLoginPage && !isRegisterPage">
+      <div class="top-navbar" v-if="!isLoginPage">
         <v-app-bar-nav-icon
           @click="outerDrawer = !outerDrawer"
           class="drawer-icon"
-          style="color: #000000; display: show"
         />
-        <h1>
-          {{ appTitle }}
-        </h1>
-
+        <h1>{{ appTitle }}</h1>
         <div class="admin-icon">
           <v-menu
             v-model="menu"
@@ -70,50 +66,108 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-btn class="avatar-btn admin_img" icon v-bind="attrs" v-on="on">
-                <v-avatar size="60">
-                  <img
-                    src="https://xsgames.co/randomusers/avatar.php?g=male"
-                    alt="User Avatar"
-                  />
-                </v-avatar>
+                <v-icon size="60">mdi-account</v-icon>
               </v-btn>
             </template>
-
             <v-card class="profile-menu" color="primary" dark>
               <v-card-text class="text-center">
-                <v-avatar size="80" class="mb-3">
-                  <img
-                    src="https://xsgames.co/randomusers/avatar.php?g=male"
-                    alt="User Image"
-                  />
-                </v-avatar>
-                <div class="text-h6 mb-3">User Name</div>
-                <v-btn block outlined class="mb-2" @click="RePassword">
-                  Reset Password
-                </v-btn>
-                <v-btn block outlined @click="logout"> Log out </v-btn>
-                <!-- <v-btn class="Logout-btn" color="#154391" @click="logout">
-            Logout
-          </v-btn> -->
+                <v-icon size="80">mdi-account</v-icon>
+                <div class="text-h6 mb-3">{{ user ? user.name : "" }}</div>
+                <v-btn block outlined class="mb-2" @click="openDialog"
+                  >Reset Password</v-btn
+                >
+                <v-btn block outlined @click="logout">Log out</v-btn>
               </v-card-text>
             </v-card>
           </v-menu>
-          <!-- <v-btn @click="openProfile" class="avatar-btn admin_img" icon>
-            <v-avatar size="40">
-              <img src="https://xsgames.co/randomusers/avatar.php?g=male" alt="User Avatar">
-            </v-avatar>
-          </v-btn>
-          <v-btn class="Logout-btn" color="#154391" @click="logout">
-            Logout
-          </v-btn> -->
         </div>
       </div>
-      <!-- <v-toolbar-title class="toolbar-title" v-if="!isLoginPage">
-        
-        <router-link to="/" tag="span" style="cursor: pointer">
-          {{ appTitle }}
-        </router-link>
-      </v-toolbar-title> -->
+
+      <v-dialog v-model="dialog" max-width="500px">
+        <v-card>
+          <v-card-title>Reset Password</v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="resetPassword">
+              <v-text-field
+                :value="user ? user.username : ''"
+                label="Username"
+                required
+                outlined
+                disabled
+              ></v-text-field>
+              <v-text-field
+                v-model="oldPassword"
+                label="Current Password"
+                type="password"
+                required
+                outlined
+                :error-messages="oldPasswordError"
+              ></v-text-field>
+              <v-text-field
+                v-model="newPassword"
+                label="New Password"
+                type="password"
+                required
+                outlined
+                :error-messages="newPasswordError"
+              ></v-text-field>
+              <v-text-field
+                v-model="confirmNewPassword"
+                label="Confirm New Password"
+                type="password"
+                required
+                outlined
+                :error-messages="confirmNewPasswordError"
+              ></v-text-field>
+              <v-card-actions>
+                <v-btn text @click="closeDialog">Cancel</v-btn>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="secondary"
+                  @click="resetPassword"
+                  :loading="loading"
+                  :disabled="!user"
+                >
+                  Reset Password
+                </v-btn>
+              </v-card-actions>
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
+      <!-- New success dialog -->
+      <v-dialog v-model="successDialog" persistent max-width="400px">
+        <v-card>
+          <v-card-title class="headline"
+            >Password Reset Successful</v-card-title
+          >
+          <v-card-text>
+            Your password has been successfully changed. For security reasons,
+            you will now be logged out. Please log in again with your new
+            password.
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="secondary" @click="forceLogout"> Log Out </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-snackbar
+        v-model="snackbar.show"
+        :color="snackbar.color"
+        :timeout="snackbar.timeout"
+        bottom
+        right
+      >
+        {{ snackbar.text }}
+        <template v-slot:action="{ attrs }">
+          <v-btn text v-bind="attrs" @click="snackbar.show = false">
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
 
       <v-main class="router-warper">
         <router-view></router-view>
@@ -123,14 +177,32 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: "AdminPage",
   data() {
     return {
       menu: false,
+      user: null,
       outerDrawer: true,
-
-      // sidebar: false,
+      dialog: false,
+      successDialog: false,
+      oldPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
+      loading: false,
+      oldPasswordError: "",
+      newPasswordError: "",
+      confirmNewPasswordError: "",
+      passwordRules: [
+        (v) => !!v || "Password is required",
+        (v) => v.length >= 6 || "Password must be at least 6 characters",
+      ],
+      confirmPasswordRules: [
+        (v) => !!v || "Confirmation is required",
+        (v) => v === this.newPassword || "Passwords must match",
+      ],
       menuItems: [
         {
           title: "Admin",
@@ -171,30 +243,192 @@ export default {
           ],
         },
       ],
+      snackbar: {
+        show: false,
+        text: "",
+        color: "success",
+        timeout: 3000,
+      },
     };
   },
+  mounted() {
+    this.fetchUserDetails();
+  },
   methods: {
-    logout() {
-      // Clear the token
+    async fetchUserDetails() {
+      try {
+        let userData =
+          localStorage.getItem("user") || sessionStorage.getItem("user");
+        let token =
+          localStorage.getItem("token") || sessionStorage.getItem("token");
+
+        if (userData && token) {
+          this.user = JSON.parse(userData);
+        } else if (token) {
+          const response = await axios.get(
+            "http://localhost:3000/authen/user",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          if (response.data.success) {
+            this.user = response.data.user;
+            (localStorage.getItem("token")
+              ? localStorage
+              : sessionStorage
+            ).setItem("user", JSON.stringify(this.user));
+          } else {
+            console.error(
+              "Failed to fetch user details:",
+              response.data.message
+            );
+            this.redirectToLogin();
+          }
+        } else {
+          this.redirectToLogin();
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+        if (error.response && error.response.status === 401) {
+          this.clearUserData();
+          this.redirectToLogin();
+        }
+      }
+    },
+    clearUserData() {
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
-      localStorage.removeItem("rememberedUsername");
-      localStorage.removeItem("rememberedPassword");
-      // Redirect to login page
-      this.$router.push({ name: "AdminLogin" });
+      localStorage.removeItem("user");
+      sessionStorage.removeItem("user");
+      this.user = null;
+    },
+    redirectToLogin() {
+      this.$router.push("/adminlogin");
+    },
+    logout() {
+      this.clearUserData();
+      this.redirectToLogin();
+    },
+    openDialog() {
+      if (this.user) {
+        this.dialog = true;
+      } else {
+        this.showSnackbar(
+          "User data not available. Please try logging in again.",
+          "error"
+        );
+      }
+    },
+    closeDialog() {
+      this.dialog = false;
+      this.resetForm();
+    },
+    resetForm() {
+      this.oldPassword = "";
+      this.newPassword = "";
+      this.confirmNewPassword = "";
+      this.resetErrors();
+    },
+
+    async resetPassword() {
+      if (!this.user) {
+        this.showSnackbar(
+          "User data not available. Please try logging in again.",
+          "error"
+        );
+        return;
+      }
+
+      this.resetErrors();
+      if (!this.validateForm()) return;
+
+      this.loading = true;
+      try {
+        const token =
+          localStorage.getItem("token") || sessionStorage.getItem("token");
+        const response = await axios.post(
+          "http://localhost:3000/api/user/reset-password",
+          {
+            username: this.user.username,
+            oldPassword: this.oldPassword,
+            newPassword: this.newPassword,
+            confirmNewPassword: this.confirmNewPassword,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.data.success) {
+          this.closeDialog();
+          this.successDialog = true;
+        } else {
+          this.showSnackbar(
+            response.data.message || "Password reset failed.",
+            "error"
+          );
+        }
+      } catch (error) {
+        console.error("Password reset error:", error.response || error);
+        this.handleResetError(error);
+      } finally {
+        this.loading = false;
+      }
+    },
+    validateForm() {
+      let isValid = true;
+      if (!this.oldPassword) {
+        this.oldPasswordError = "Current password is required";
+        isValid = false;
+      }
+      if (!this.newPassword) {
+        this.newPasswordError = "New password is required";
+        isValid = false;
+      }
+      if (!this.confirmNewPassword) {
+        this.confirmNewPasswordError = "Please confirm your new password";
+        isValid = false;
+      }
+      if (this.newPassword !== this.confirmNewPassword) {
+        this.confirmNewPasswordError = "Passwords do not match";
+        isValid = false;
+      }
+      return isValid;
+    },
+
+    resetErrors() {
+      this.oldPasswordError = "";
+      this.newPasswordError = "";
+      this.confirmNewPasswordError = "";
+    },
+
+    handleResetError(error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        "An error occurred during password reset";
+      this.showSnackbar(errorMessage, "error");
+    },
+    showSnackbar(text, color = "success") {
+      this.snackbar.text = text;
+      this.snackbar.color = color;
+      this.snackbar.show = true;
+    },
+    forceLogout() {
+      this.clearUserData();
+      this.successDialog = false;
+      this.redirectToLogin();
     },
   },
   computed: {
     appTitle() {
-      // Check if a meta title exists and use it; otherwise fallback to default
-      return this.$route.meta.title || "Dashboard"; // Fallback to default title
+      return this.$route.meta.title || "Dashboard";
     },
     isLoginPage() {
-      // Check if the current route is the login page
-      return this.$route.name === "AdminLogin"; // Assuming your login route is named 'login'
-    },
-    isRegisterPage() {
-      return this.$route.name === "AdminRegister";
+      return this.$route.name === "AdminLogin";
     },
   },
 };
@@ -214,26 +448,18 @@ export default {
 .title-text {
   color: #ffffff;
 }
-// .toolbar-title{
-//   text-align: center;
-//   height: 80px;
-//   border-bottom: black 1px solid;
-//   box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1);
-// }
 .logout-btn {
   position: absolute;
   bottom: 0;
 }
 ::v-deep .v-list-item__icon .v-icon {
-  color: rgb(255, 255, 255) !important;
+  color: #ffffff !important;
 }
 .top-navbar {
   display: flex;
   align-items: center;
-  text-align: center;
   justify-content: space-between;
   height: 90px;
-  // border-bottom: black 1px solid;
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
   z-index: 1;
 }
@@ -245,18 +471,10 @@ export default {
   margin-right: 10%;
 }
 .admin-icon {
-  // display: flex;
-  // width: 200px;
   margin-right: 2%;
-  // justify-content: space-evenly;
 }
 .profile-menu {
   width: 250px;
-}
-.admin_img {
-}
-.Logout-btn {
-  color: #ffffff;
 }
 @media (max-width: 1263px) {
   .drawer-icon {

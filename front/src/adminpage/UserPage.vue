@@ -27,24 +27,18 @@
         <template v-slot:item="{ item, index }">
           <tr>
             <td class="text-center">{{ index + 1 }}</td>
-            <td class="img-td">
-              <v-img
-                :src="item.img || require('@/assets/default.png')"
-                :lazy-src="require('@/assets/default.png')"
-                max-height="60"
-                contain
-                @error="() => handleImageError(item)"
-              ></v-img>
-            </td>
-            <td class="title-td">{{ item.partner_name }}</td>
-            <td class="action-td">
-              <v-btn class="mr-5" text small @click="editItem(item)">
-                <v-icon  color="secondary">mdi-pencil-outline</v-icon>
+            <td class="username-text-td">{{ item.username }}</td>
+            <td class="name-text-td">{{ item.name }}</td>
+            <td>{{ formatDate(item.created_at) }}</td>
+            <td>{{ formatDate(item.updated_at) }}</td>
+            <!-- <td class="action-td">
+              <v-btn text small @click="editItem(item)">
+                <v-icon color="secondary">mdi-pencil-outline</v-icon>
               </v-btn>
               <v-btn text small @click="confirmDelete(item)">
                 <v-icon color="#EA2A2D">mdi-delete</v-icon>
               </v-btn>
-            </td>
+            </td> -->
           </tr>
         </template>
       </v-data-table>
@@ -102,14 +96,21 @@ export default {
           sortable: false,
         },
         {
-          text: "Image",
-          value: "icon",
+          text: "User name",
+          value: "username",
           headerClass: "text-center",
           align: "center",
           sortable: false,
         },
-        { text: "Partner name", value: "partner_name", align: "center" },
-        { text: "Actions", value: "actions", sortable: false, align: "center" },
+        {
+          text: "Full name",
+          value: "name",
+          headerClass: "text-center",
+          align: "center",
+        },
+        { text: "Created at", value: "created_at", align: "center" },
+        { text: "Updated at", value: "updated_at", align: "center" },
+        // { text: "Actions", value: "actions", sortable: false, align: "center" },
       ],
       dialog: false, // Controls the dialog visibility
       snackbarSuccess: false, // Controls the success snackbar visibility
@@ -125,9 +126,9 @@ export default {
       this.loading = true;
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/partners/getall",
+          "http://localhost:3000/api/user/getall",
           {
-            timeout: 10000,
+            timeout: 10000, // 10 seconds timeout
           }
         );
         this.items = Array.isArray(response.data)
@@ -143,12 +144,12 @@ export default {
       }
     },
     addNewItem() {
-      this.$router.push({ name: "OurPartnerCreate" });
+      this.$router.push({ name: "userCreate" });
     },
     editItem(item) {
       this.$router.push({
-        name: "OurPartnerEdit",
-        params: { id: item.our_partner_id },
+        name: "userEdit",
+        params: { id: item.list_task_id },
       });
     },
     // Opens the dialog and sets the item to delete
@@ -176,7 +177,7 @@ export default {
       this.loading = true;
       try {
         const response = await axios.put(
-          `http://localhost:3000/api/partners/del/${this.itemToDelete.our_partner_id}`
+          `http://localhost:3000/api/listtask/del/${this.itemToDelete.list_task_id}`
         );
         if (response.status === 200) {
           this.snackbarSuccess = true;
@@ -192,24 +193,25 @@ export default {
         this.closeDialog();
       }
     },
-    handleImageError(item) {
-      console.error("Image failed to load for item:", {
-        our_product_id: item.our_partner_id,
-        partner_name: item.partner_name,
-        img: item.img,
+    formatDate(dateString) {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+
+      // Format date as DD MMM YYYY
+      const dateFormatted = date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
       });
 
-      // Attempt to construct a corrected URL
-      let correctedUrl = item.img;
-      // if (correctedUrl) {
-      //     // Remove multiple consecutive slashes
-      //     correctedUrl = correctedUrl.replace(/([^:]\/)\/+/g, "$1");
-      //     // Ensure there's exactly one slash after 'http://' or 'https://'
-      //     correctedUrl = correctedUrl.replace(/(https?:\/\/)\/*/g, "$1/");
-      //     console.log("Attempted corrected URL:", correctedUrl);
-      // }
+      // Format time as HH:MM (24-hour format)
+      const timeFormatted = date.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
 
-      this.$set(item, "img", correctedUrl || require("@/assets/default.png"));
+      return `${dateFormatted} ${timeFormatted}`;
     },
   },
 };
@@ -225,18 +227,23 @@ export default {
 .title-td {
   min-width: 150px;
 }
+.username-text-td {
+  min-width: 150px;
+}
+.name-text-td {
+  min-width: 150px;
+}
 
 .desc-td {
-  max-width: 250px;
+  max-width: 350px;
   white-space: nowrap;
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
 
 .action-td {
-  height: inherit;
   display: flex;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
 }
 
@@ -244,12 +251,6 @@ export default {
   font-size: 36px;
   display: flex;
   align-items: center;
-}
-td {
-  min-height: 80px;
-}
-.img-td {
-  max-width: 100px;
 }
 
 ::v-deep .v-data-table-header th {

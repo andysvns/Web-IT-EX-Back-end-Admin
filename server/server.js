@@ -18,6 +18,7 @@ const stacktypeRoutes = require("./routes/stacktype");
 const socialtypeRoutes = require("./routes/socialtype");
 const socialurlRoutes = require("./routes/socialurl");
 const contactRoutes = require("./routes/contact");
+const userRoutes = require("./routes/userspath");
 
 const app = express();
 app.use(cors());
@@ -38,6 +39,7 @@ app.use("/api/stacktype", stacktypeRoutes);
 app.use("/api/socialtype", socialtypeRoutes);
 app.use("/api/socialurl", socialurlRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/user", userRoutes);
 
 // Database connection
 

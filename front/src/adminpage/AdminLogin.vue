@@ -4,8 +4,14 @@
       <v-row align="center" justify="center">
         <v-col cols="12" sm="8" md="4">
           <div class="card-warper">
-            <v-card-title class="text-h1 white--text text-center justify-center mb-4 font-weight-regular">Log in</v-card-title>
-            <v-card-subtitle class="text-subtitle-1 white--text text-center mb-6 font-weight-regular">Welcome to IT Excellence</v-card-subtitle>
+            <v-card-title
+              class="text-h1 white--text text-center justify-center mb-4 font-weight-regular"
+              >Log in</v-card-title
+            >
+            <v-card-subtitle
+              class="text-subtitle-1 white--text text-center mb-6 font-weight-regular"
+              >Welcome to IT Excellence</v-card-subtitle
+            >
             <v-form @submit.prevent="login">
               <v-text-field
                 v-model="username"
@@ -37,10 +43,17 @@
 
               <v-row no-gutters class="align-center">
                 <v-col cols="6">
-                  <v-checkbox v-model="rememberMe" label="Remember me" color="white" dark></v-checkbox>
+                  <v-checkbox
+                    v-model="rememberMe"
+                    label="Remember me"
+                    color="white"
+                    dark
+                  ></v-checkbox>
                 </v-col>
                 <v-col cols="6" class="text-right">
-                  <a href="/adminregister" class="white--text custom-register">Register</a>
+                  <a href="/adminregister" class="white--text custom-register"
+                    >Register</a
+                  >
                 </v-col>
               </v-row>
 
@@ -63,7 +76,7 @@
         </v-col>
       </v-row>
     </v-container>
-    <img class="footer_login" src="../assets/admin_l.png" alt="">
+    <img class="footer_login" src="../assets/admin_l.png" alt="" />
   </div>
 </template>
 
@@ -83,8 +96,8 @@ export default {
     passwordError: "",
   }),
   mounted() {
-    const storedUsername = localStorage.getItem('rememberedUsername');
-    const storedPassword = localStorage.getItem('rememberedPassword');
+    const storedUsername = localStorage.getItem("rememberedUsername");
+    const storedPassword = localStorage.getItem("rememberedPassword");
     if (storedUsername && storedPassword) {
       this.username = storedUsername;
       this.password = atob(storedPassword);
@@ -98,17 +111,20 @@ export default {
 
       this.loading = true;
       try {
-        const response = await axios.post("http://localhost:3000/authen/login", {
-          username: this.username,
-          password: this.password,
-        });
+        const response = await axios.post(
+          "http://localhost:3000/authen/login",
+          {
+            username: this.username,
+            password: this.password,
+          }
+        );
 
         if (response.data.success) {
           console.log("Login successful");
-          this.storeToken(response.data.token);
+          this.storeUserData(response.data);
           this.handleRememberMe();
+          location.reload();
           this.$router.push({ name: "AdminPage" });
-          window.location.reload();
         }
       } catch (error) {
         console.error("Login error:", error.response || error);
@@ -117,6 +133,15 @@ export default {
         this.loading = false;
       }
     },
+
+    storeUserData(data) {
+      const { token, user } = data;
+      const storage = this.rememberMe ? localStorage : sessionStorage;
+
+      storage.setItem("token", token);
+      storage.setItem("user", JSON.stringify(user));
+    },
+
     validateForm() {
       let isValid = true;
       if (!this.username) {
@@ -135,7 +160,8 @@ export default {
       this.passwordError = "";
     },
     handleLoginError(error) {
-      const errorMessage = error.response?.data?.message || "An error occurred during login";
+      const errorMessage =
+        error.response?.data?.message || "An error occurred during login";
       if (errorMessage.includes("User not found")) {
         this.usernameError = "User not found";
       } else if (errorMessage.includes("Incorrect password")) {
@@ -153,11 +179,11 @@ export default {
     },
     handleRememberMe() {
       if (this.rememberMe) {
-        localStorage.setItem('rememberedUsername', this.username);
-        localStorage.setItem('rememberedPassword', btoa(this.password));
+        localStorage.setItem("rememberedUsername", this.username);
+        localStorage.setItem("rememberedPassword", btoa(this.password));
       } else {
-        localStorage.removeItem('rememberedUsername');
-        localStorage.removeItem('rememberedPassword');
+        localStorage.removeItem("rememberedUsername");
+        localStorage.removeItem("rememberedPassword");
       }
     },
   },
@@ -170,14 +196,14 @@ export default {
   height: 100vh;
 }
 .bg-deep-blue {
-  background-color: #001F3F !important;
+  background-color: #001f3f !important;
   // margin-top: -50px;
 }
-.bg-input{
+.bg-input {
   background-color: #224957;
 }
 
-.card-warper{
+.card-warper {
   // width: 25vw;
   padding-left: 10%;
   padding-right: 10%;
@@ -187,7 +213,7 @@ export default {
   border-radius: 50px; /* This adds the border radius */
   background-color: #224957;
 }
-.footer_login{
+.footer_login {
   position: absolute;
   bottom: 0;
   width: 100vw;
@@ -201,10 +227,9 @@ export default {
   text-decoration: none;
 }
 @media only screen and (max-width: 1200px) {
-  .card-warper{
-
-  padding-left: 0;
-  padding-right: 0;
+  .card-warper {
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 </style>

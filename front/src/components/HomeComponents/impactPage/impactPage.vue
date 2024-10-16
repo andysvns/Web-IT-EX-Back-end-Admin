@@ -48,7 +48,7 @@
             <td class="title-td">{{ item.num_text }}</td>
             <td class="title-td">{{ item.desc }}</td>
             <td class="action-td">
-              <v-btn text small @click="editItem(item)">
+              <v-btn class="mr-5" text small @click="editItem(item)">
                 <v-icon color="secondary">mdi-pencil-outline</v-icon>
               </v-btn>
               <v-btn text small @click="confirmDelete(item)">
@@ -242,7 +242,7 @@ export default {
 }
 
 .title-td {
-  min-width: 150px;
+  min-width: 75px;
 }
 
 .desc-td {
@@ -255,7 +255,7 @@ export default {
 .action-td {
   height: inherit;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
 }
 

@@ -213,7 +213,7 @@ export default {
 }
 
 .desc-td {
-  max-width: 250px;
+  max-width: 350px;
   white-space: nowrap;
   overflow-x: hidden;
   text-overflow: ellipsis;

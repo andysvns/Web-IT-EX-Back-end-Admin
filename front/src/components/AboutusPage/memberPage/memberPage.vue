@@ -41,7 +41,7 @@
             <td class="title-td">{{ item.mem_position }}</td>
             <td class="desc-td">{{ item.mem_address }}</td>
             <td class="action-td">
-              <v-btn text small @click="editItem(item)">
+              <v-btn class="mr-5" text small @click="editItem(item)">
                 <v-icon color="secondary">mdi-pencil-outline</v-icon>
               </v-btn>
               <v-btn text small @click="confirmDelete(item)">
@@ -234,7 +234,7 @@ export default {
 .action-td {
   height: inherit;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
 }
 
