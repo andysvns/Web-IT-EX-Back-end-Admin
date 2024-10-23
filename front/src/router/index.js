@@ -16,7 +16,7 @@ axios.interceptors.request.use((config) => {
 
 const routes = [
   {
-    path: "/admin",
+    path: "/",
     name: "AdminPage",
     component: () => import("../adminpage/UserPage.vue"),
     meta: { requiresAuth: true },
@@ -163,6 +163,13 @@ const routes = [
       import("../components/HomeComponents/StackToolsPage/StackToolsEdit.vue"),
     meta: { title: "Tool Edit", requiresAuth: true },
   },
+  {
+    path: "/stacktype",
+    name: "StackType",
+    component: () =>
+      import("../components/HomeComponents/StackToolsPage/StackToolType.vue"),
+    meta: { title: "Stack Type", requiresAuth: true },
+  },
 
   {
     path: "/ourproduct",
@@ -254,6 +261,13 @@ const routes = [
     component: () =>
       import("../components/ContactPage/SocialContactPage/SocialurlEdit.vue"),
     meta: { title: "Social Edit", requiresAuth: true },
+  },
+  {
+    path: "/socialtype",
+    name: "SocialType",
+    component: () =>
+      import("../components/ContactPage/SocialContactPage/SocialType.vue"),
+    meta: { title: "Social Type", requiresAuth: true },
   },
 ];
 

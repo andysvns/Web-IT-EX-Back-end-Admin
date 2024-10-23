@@ -108,7 +108,7 @@ export default {
         },
         {
           text: "Name",
-          value: "icon name",
+          value: "icon",
           headerClass: "text-center",
           align: "center",
         },

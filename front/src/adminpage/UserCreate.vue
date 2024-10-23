@@ -18,7 +18,7 @@
       <v-row class="ml-5 mr-5">
         <v-col cols="12">
           <v-card>
-            <v-card-title>User Registration</v-card-title>
+            <v-card-title>Add new user</v-card-title>
             <v-card-text>
               <v-text-field
                 label="Username"

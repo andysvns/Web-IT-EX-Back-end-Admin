@@ -74,6 +74,8 @@ const stacktypeGetOne = [
     }
   },
 ];
+
+
 const stacktypeUpdate = [
   async (req, res) => {
     const { id } = req.params; // Extract the 'id' from the request parameters
@@ -99,28 +101,50 @@ const stacktypeUpdate = [
     }
   },
 ];
+
 const stacktypeDelete = [
   async (req, res) => {
     const { id } = req.params;
+    const connection = await pool.getConnection();
 
     try {
-      const [result] = await pool.query(
+      await connection.beginTransaction();
+
+      // Update stack_type table
+      const [stackTypeResult] = await connection.query(
         "UPDATE stack_type SET stt = 0, updated_at = CURRENT_TIMESTAMP WHERE stack_type_id = ?",
         [id]
       );
 
-      if (result.affectedRows > 0) {
-        res.status(200).json({ message: "stt field updated successfully" });
+      // Update our_stack_tool table
+      const [ourStackToolResult] = await connection.query(
+        "UPDATE our_stack_tool SET stt = 0, updated_at = CURRENT_TIMESTAMP WHERE stack_type_id = ?",
+        [id]
+      );
+
+      await connection.commit();
+
+      if (stackTypeResult.affectedRows > 0 || ourStackToolResult.affectedRows > 0) {
+        res.status(200).json({ 
+          message: "Records updated successfully",
+          details: {
+            stack_type_updated: stackTypeResult.affectedRows,
+            our_stack_tool_updated: ourStackToolResult.affectedRows
+          }
+        });
       } else {
-        res.status(404).json({ message: "Record not found" });
+        res.status(404).json({ message: "No records found to update" });
       }
     } catch (error) {
-      console.error("Error updating stt field by ID:", error);
+      await connection.rollback();
+      console.error("Error updating stt fields:", error);
       res.status(500).json({
-        error: "Failed to update stt field",
+        error: "Failed to update records",
         details: error.message,
         stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
       });
+    } finally {
+      connection.release();
     }
   },
 ];

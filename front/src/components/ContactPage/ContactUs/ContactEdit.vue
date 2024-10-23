@@ -3,7 +3,7 @@
     <v-row justify="center" class="mt-5">
       <v-col cols="12" sm="10" md="8" lg="6">
         <v-card elevation="2">
-          <v-toolbar flat color="transparent">
+          <v-toolbar flat color="transparent mb-3">
             <v-btn icon @click="goBack">
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>

@@ -207,7 +207,7 @@ export default {
         {
           title: "Admin",
           icon: "mdi-account-cog-outline",
-          path: "/admin",
+          path: "/",
         },
         {
           title: "Home",

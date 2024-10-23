@@ -19,6 +19,10 @@
           style="max-width: 150px"
           @change="filterItems"
         ></v-select>
+        <v-btn text outlined @click="StackType" class="ml-6">
+          Stack Type
+          <v-icon right>mdi-pencil-outline</v-icon>
+        </v-btn>
         <v-spacer></v-spacer>
         <v-text-field
           v-model="search"
@@ -176,6 +180,9 @@ export default {
     },
     addNewItem() {
       this.$router.push({ name: "StackToolsCreate" });
+    },
+    StackType() {
+      this.$router.push({ name: "StackType" });
     },
     editItem(item) {
       this.$router.push({

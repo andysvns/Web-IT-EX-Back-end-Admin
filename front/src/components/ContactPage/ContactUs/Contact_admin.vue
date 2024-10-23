@@ -14,7 +14,7 @@
               class="headline d-flex justify-space-between align-center"
             >
               Contact Information
-              <v-btn icon @click="editItem(contact)" color="primary">
+              <v-btn icon @click="editItem(contact)" color="secondary">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
             </v-card-title>

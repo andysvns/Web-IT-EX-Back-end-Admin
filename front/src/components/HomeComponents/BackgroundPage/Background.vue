@@ -30,30 +30,47 @@
     </v-row>
 
     <!-- Edit Dialog -->
-    <v-dialog v-model="dialog" max-width="500px">
+    <v-dialog v-model="dialog" max-width="600px">
       <v-card>
-        <v-card-title>Edit Background</v-card-title>
-        <v-card-text>
+        <v-card-title class="headline primary white--text">
+          Edit Background
+        </v-card-title>
+        <v-card-text class="pt-4">
           <v-form ref="form" v-model="valid">
             <v-text-field
               label="Background name"
               :rules="titleRules"
               v-model="editedItem.img_name"
               outlined
+              dense
+              class="mb-4"
             ></v-text-field>
-            <v-img
-              :src="
-                displayedImageUrl ||
-                editedItem.img ||
-                require('@/assets/default.png')
-              "
-              :lazy-src="require('@/assets/default.png')"
-              max-height="250"
-              contain
-              class="mt-6 mb-6"
-              @error="handleImageError"
-            ></v-img>
-
+            <v-card outlined class="mb-4">
+              <v-img
+                :src="
+                  displayedImageUrl ||
+                  editedItem.img ||
+                  require('@/assets/default.png')
+                "
+                :lazy-src="require('@/assets/default.png')"
+                max-height="300"
+                contain
+                @error="handleImageError"
+              >
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular
+                      indeterminate
+                      color="primary"
+                    ></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
+            </v-card>
             <input
               type="file"
               ref="fileInput"
@@ -61,15 +78,28 @@
               style="display: none"
               @change="handleImageUpload"
             />
-            <v-btn color="secondary" @click="$refs.fileInput.click()">
-              Edit Image
+            <v-btn
+              color="primary"
+              @click="$refs.fileInput.click()"
+              block
+              class="mb-4"
+            >
+              <v-icon left>mdi-image-edit</v-icon>
+              Change Image
             </v-btn>
           </v-form>
         </v-card-text>
+        <v-divider></v-divider>
         <v-card-actions>
+          <v-btn color="" text @click="closeDialog"> Cancel </v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="red" text @click="closeDialog">Cancel</v-btn>
-          <v-btn color="green" text @click="validateAndUpdate">Save</v-btn>
+          <v-btn
+            color="secondary"
+            @click="validateAndUpdate"
+            :disabled="!valid"
+          >
+            Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

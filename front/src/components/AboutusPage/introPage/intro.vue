@@ -132,7 +132,7 @@ export default {
 
 .section-content {
   margin-top: 12px;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   color: #666; /* Lighter color for content */
   line-height: 1.6;
 }

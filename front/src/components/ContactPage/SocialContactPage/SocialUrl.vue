@@ -19,10 +19,10 @@
           style="max-width: 150px"
           @change="filterItems"
         ></v-select>
-        <!-- <v-btn text outlined @click="socialedit" class="ml-6">
+        <v-btn text outlined @click="socialtype" class="ml-6">
           Social
           <v-icon right>mdi-pencil-outline</v-icon>
-        </v-btn> -->
+        </v-btn>
         <v-spacer></v-spacer>
         <v-text-field
           v-model="search"
@@ -62,90 +62,6 @@
           </tr>
         </template>
       </v-data-table>
-
-      <v-dialog v-model="dialog" max-width="500">
-        <v-card>
-          <v-card-title
-            class="headline d-flex justify-space-between align-center pa-4"
-          >
-            <v-btn icon @click="toggleView" color="primary">
-              <v-icon>{{ isAddView ? "mdi-arrow-left" : "mdi-plus" }}</v-icon>
-            </v-btn>
-            <v-spacer></v-spacer>
-            <span class="text-center">{{
-              isAddView ? "Add Social Type" : "Social Types"
-            }}</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-
-          <v-card-text class="pa-4">
-            <!-- List View -->
-            <v-row v-if="!isAddView" align="center" justify="start">
-              <v-col
-                v-for="(type, index) in socialTypes"
-                :key="index"
-                cols="4"
-                sm="3"
-                class="text-center"
-              >
-                <v-icon color="secondary" size="56" class="mb-2" dark>{{
-                  type.icon || "mdi-account"
-                }}</v-icon>
-                <div class="caption">
-                  <div>
-                    {{ type.s_type_name }}
-                  </div>
-                  <v-btn class="" text small @click="editItem(item)">
-                    <v-icon color="secondary">mdi-pencil-outline</v-icon>
-                  </v-btn>
-                </div>
-              </v-col>
-              <v-col
-                v-if="socialTypes.length === 0"
-                cols="12"
-                class="text-center"
-              >
-                <v-progress-circular
-                  indeterminate
-                  color="primary"
-                ></v-progress-circular>
-              </v-col>
-            </v-row>
-
-            <!-- Add Form View -->
-            <v-form v-else @submit.prevent="addNewItemType">
-              <v-text-field
-                v-model="newType.s_type_name"
-                label="Social Type Name"
-                required
-                :error-messages="nameError"
-              ></v-text-field>
-              <v-text-field
-                v-model="newType.icon"
-                label="Icon (e.g., mdi-facebook)"
-              ></v-text-field>
-              <v-icon size="78" color="secondary">{{
-                newType.icon || "mdi-help-circle"
-              }}</v-icon>
-              <v-btn
-                color="secondary"
-                type="submit"
-                block
-                class="mt-4"
-                :loading="isLoading"
-                :disabled="!newType.s_type_name"
-              >
-                Add Social Type
-              </v-btn>
-            </v-form>
-          </v-card-text>
-
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="closeDialog">Close</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
 
       <!-- Confirmation Dialog -->
       <!-- Delete Confirmation Dialog -->
@@ -228,7 +144,7 @@ export default {
   mounted() {
     this.fetchStackTypes();
     this.fetchData();
-    this.fetchSocialTypes();
+
   },
   methods: {
     async fetchStackTypes() {
@@ -320,34 +236,15 @@ export default {
       }
     },
 
-    socialedit() {
-      this.dialog = true;
+    socialtype() {
+      this.$router.push({ name: "SocialType" });
     },
-    fetchSocialTypes() {
-      axios
-        .get("http://localhost:3000/api/socialtype/getall")
-        .then((response) => {
-          this.socialTypes = response.data;
-        })
-        .catch((error) => {
-          console.error("Error fetching social types:", error);
-          this.showErrorMessage("Failed to fetch social types");
-        });
-    },
-    toggleView() {
-      this.isAddView = !this.isAddView;
-      if (!this.isAddView) {
-        this.resetForm();
-      }
-    },
-    resetForm() {
-      this.newType = { s_type_name: "", icon: "" };
-      this.nameError = "";
-    },
+
+
+
     closeDialog() {
       this.dialog = false;
-      this.isAddView = false;
-      this.resetForm();
+
     },
     addNewItemType() {
       if (!this.newType.s_type_name) {

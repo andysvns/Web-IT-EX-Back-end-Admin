@@ -47,7 +47,7 @@
                 color="secondary"
                 @click="$refs.fileInput.click()"
               >
-                Upload Image
+                Upload Gif
               </v-btn>
 
               <v-img

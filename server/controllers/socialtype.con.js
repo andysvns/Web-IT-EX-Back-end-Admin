@@ -2,13 +2,20 @@ const { pool } = require("../db");
 
 const socialtypeCreate = [
   async (req, res) => {
-    const { s_type_nmae, icon } = req.body;
-    console.log("Task creation attempt for Social name:", s_type_nmae);
+    const { s_type_name, icon } = req.body;  // Fixed typo in variable name
+    console.log("Social type creation attempt:", { name: s_type_name, icon });
 
-    if (!s_type_nmae) {
+    // Input validation
+    if (!s_type_name) {
       return res
         .status(400)
         .json({ success: false, message: "Name is required" });
+    }
+
+    if (!icon) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Icon is required" });
     }
 
     try {
@@ -16,21 +23,48 @@ const socialtypeCreate = [
       const updated_at = new Date();
       const stt = 1;
 
+      // Sanitize inputs
+      const sanitizedName = s_type_name.trim();
+      const sanitizedIcon = icon.trim();
+
       const [result] = await pool.execute(
-        "INSERT INTO social_type ( s_type_name , icon , created_at, updated_at, stt) VALUES (?, ?, ?, ?, ?)",
-        [s_type_nmae, icon, created_at, updated_at, stt]
+        "INSERT INTO social_type (s_type_name, icon, created_at, updated_at, stt) VALUES (?, ?, ?, ?, ?)",
+        [sanitizedName, sanitizedIcon, created_at, updated_at, stt]
       );
 
-      console.log("Item creation successful for Stack name:", s_type_nmae);
+      console.log("Social type created successfully:", {
+        id: result.insertId,
+        name: sanitizedName
+      });
 
-      res.json({
+      res.status(201).json({
         success: true,
-        message: "Item created successfully",
-        taskId: result.insertId,
+        message: "Social type created successfully",
+        data: {
+          social_type_id: result.insertId,
+          s_type_name: sanitizedName,
+          icon: sanitizedIcon,
+          created_at,
+          updated_at,
+          stt
+        }
       });
     } catch (error) {
-      console.error("Item creation error:", error);
-      res.status(500).json({ success: false, message: "Server error" });
+      console.error("Social type creation error:", error);
+      
+      // Check for duplicate entry
+      if (error.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ 
+          success: false, 
+          message: "A social type with this name already exists" 
+        });
+      }
+
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to create social type",
+        error: error.message 
+      });
     }
   },
 ];
@@ -105,25 +139,46 @@ const socialtypeUpdate = [
 const socialtypeDelete = [
   async (req, res) => {
     const { id } = req.params;
+    const connection = await pool.getConnection();
 
     try {
-      const [result] = await pool.query(
+      await connection.beginTransaction();
+
+      // Update social_type table
+      const [socialTypeResult] = await connection.query(
         "UPDATE social_type SET stt = 0, updated_at = CURRENT_TIMESTAMP WHERE social_type_id = ?",
         [id]
       );
 
-      if (result.affectedRows > 0) {
-        res.status(200).json({ message: "stt field updated successfully" });
+      // Update social_url table
+      const [socialUrlResult] = await connection.query(
+        "UPDATE social_url SET stt = 0, updated_at = CURRENT_TIMESTAMP WHERE social_type_id = ?",
+        [id]
+      );
+
+      await connection.commit();
+
+      if (socialTypeResult.affectedRows > 0 || socialUrlResult.affectedRows > 0) {
+        res.status(200).json({ 
+          message: "Records updated successfully",
+          details: {
+            social_type_updated: socialTypeResult.affectedRows,
+            social_url_updated: socialUrlResult.affectedRows
+          }
+        });
       } else {
-        res.status(404).json({ message: "Record not found" });
+        res.status(404).json({ message: "No records found to update" });
       }
     } catch (error) {
-      console.error("Error updating stt field by ID:", error);
+      await connection.rollback();
+      console.error("Error updating stt fields:", error);
       res.status(500).json({
-        error: "Failed to update stt field",
+        error: "Failed to update records",
         details: error.message,
         stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
       });
+    } finally {
+      connection.release();
     }
   },
 ];
