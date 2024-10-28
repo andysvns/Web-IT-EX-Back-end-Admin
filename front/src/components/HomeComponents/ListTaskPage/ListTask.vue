@@ -36,7 +36,7 @@
             <td class="title-td">{{ item.title }}</td>
             <td class="desc-td">{{ item.desc }}</td>
             <td class="action-td">
-              <v-btn text small @click="editItem(item)">
+              <v-btn class="mr-5" text small @click="editItem(item)">
                 <v-icon color="secondary">mdi-pencil-outline</v-icon>
               </v-btn>
               <v-btn text small @click="confirmDelete(item)">
@@ -207,7 +207,9 @@ export default {
   overflow-x: auto;
   white-space: nowrap;
 }
-
+.icon-text-td {
+  min-width: 150px;
+}
 .title-td {
   min-width: 150px;
 }
@@ -220,8 +222,9 @@ export default {
 }
 
 .action-td {
+  
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
 }
 
