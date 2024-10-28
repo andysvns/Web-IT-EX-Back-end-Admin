@@ -251,6 +251,28 @@ export default {
       },
     };
   },
+
+  watch: {
+    // Watch for changes to successDialog
+    successDialog(newValue) {
+      if (newValue) {
+        // When success dialog is shown, set flag in sessionStorage
+        sessionStorage.setItem('passwordResetSuccess', 'true');
+      } else {
+        // When dialog is closed normally, remove the flag
+        sessionStorage.removeItem('passwordResetSuccess');
+      }
+    }
+  },
+  created() {
+    // Check if there was a password reset success before refresh
+    const hadPasswordResetSuccess = sessionStorage.getItem('passwordResetSuccess') === 'true';
+    if (hadPasswordResetSuccess) {
+      // If page was refreshed during success dialog, force logout
+      this.forceLogout();
+    }
+  },
+
   mounted() {
     this.fetchUserDetails();
   },
@@ -419,6 +441,7 @@ export default {
     },
     forceLogout() {
       this.clearUserData();
+      sessionStorage.removeItem('passwordResetSuccess');
       this.successDialog = false;
       this.redirectToLogin();
     },
