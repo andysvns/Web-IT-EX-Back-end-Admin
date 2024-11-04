@@ -27,9 +27,9 @@
         :items-per-page="15"
         class="elevation-1"
       >
-        <template v-slot:item="{ item, index }">
+        <template v-slot:item="{ item }">
           <tr>
-            <td class="text-center">{{ index + 1 }}</td>
+            <td class="text-center">{{ getSequentialNumber(item) }}</td>
             <td class="icon-text-td">{{ item.stack_name }}</td>
             <td class="action-td">
               <v-btn class="mr-5" text small @click="openEditDialog(item)">
@@ -48,7 +48,7 @@
         <v-card>
           <v-card-title>Add New Stack Type</v-card-title>
           <v-card-text>
-            <v-form ref="addForm" v-model="addFormValid">
+            <v-form ref="addForm" v-model="addFormValid" @submit.prevent>
               <v-text-field
                 v-model.trim="newStackType.stack_name"
                 label="Stack Name"
@@ -57,6 +57,7 @@
                 outlined
                 :error-messages="errorMessage"
                 @input="errorMessage = ''"
+                @keyup.enter="createStackType"
               ></v-text-field>
             </v-form>
           </v-card-text>
@@ -141,10 +142,9 @@ export default {
       headers: [
         {
           text: "List",
-          value: "list",
+          value: "stack_type_id",
           headerClass: "text-center",
           align: "center",
-          sortable: false,
         },
         {
           text: "Name",
@@ -189,12 +189,23 @@ export default {
       },
     };
   },
-
+  computed: {
+    sortedItems() {
+      return [...this.items].sort((a, b) => a.stack_type_id - b.stack_type_id);
+    },
+  },
   mounted() {
     this.fetchData();
   },
 
   methods: {
+    getSequentialNumber(item) {
+      return (
+        this.sortedItems.findIndex(
+          (i) => i.stack_type_id === item.stack_type_id
+        ) + 1
+      );
+    },
     // Fetch all stack types
     async fetchData() {
       this.loading = true;

@@ -18,15 +18,17 @@
 
       <v-data-table
         :headers="headers"
-        :items="items"
+        :items="sortedItems"
         :search="search"
         :loading="loading"
         :items-per-page="15"
         class="elevation-1"
+        :sort-by="['impact_num_id']"
+        :sort-desc="[false]"
       >
-        <template v-slot:item="{ item, index }">
+        <template v-slot:item="{ item }">
           <tr>
-            <td class="text-center">{{ index + 1 }}</td>
+            <td class="text-center">{{ getSequentialNumber(item) }}</td>
             <td class="img-td">
               <v-img
                 :src="item.img || require('@/assets/default.png')"
@@ -46,7 +48,9 @@
               ></v-img>
             </td>
             <td class="title-td">{{ item.num_text }}</td>
-            <td class="title-td">{{ item.desc }}</td>
+            <td class="title-td">
+              <div v-html="formatText(item.desc)" class="p-desc"></div>
+            </td>
             <td class="action-td">
               <v-btn class="mr-5" text small @click="editItem(item)">
                 <v-icon color="secondary">mdi-pencil-outline</v-icon>
@@ -63,10 +67,7 @@
       <v-dialog v-model="dialog" max-width="400">
         <v-card>
           <v-card-title class="headline">Are you sure?</v-card-title>
-          <v-card-text>
-            Are you sure you want to delete this item?
-          </v-card-text>
-
+          <v-card-text>Are you sure you want to delete this item?</v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="green darken-1" text @click="closeDialog"
@@ -77,7 +78,7 @@
         </v-card>
       </v-dialog>
 
-      <!-- Snackbar for deletion confirmation -->
+      <!-- Snackbars remain unchanged -->
       <v-snackbar v-model="snackbarSuccess" bottom right color="success">
         <v-icon color="white" left>mdi-check-circle</v-icon>
         Item deleted successfully!
@@ -106,10 +107,9 @@ export default {
       headers: [
         {
           text: "List",
-          value: "list",
+          value: "impact_num_id",
           headerClass: "text-center",
           align: "center",
-          sortable: false,
         },
         {
           text: "Gif",
@@ -129,16 +129,32 @@ export default {
         { text: "Description", value: "desc", align: "center" },
         { text: "Actions", value: "actions", sortable: false, align: "center" },
       ],
-      dialog: false, // Controls the dialog visibility
-      snackbarSuccess: false, // Controls the success snackbar visibility
-      snackbarError: false, // Controls the error snackbar visibility
-      itemToDelete: null, // Stores the item to be deleted
+      dialog: false,
+      snackbarSuccess: false,
+      snackbarError: false,
+      itemToDelete: null,
     };
+  },
+
+  computed: {
+    sortedItems() {
+      return [...this.items].sort((a, b) => a.impact_num_id - b.impact_num_id);
+    },
   },
   mounted() {
     this.fetchData();
   },
   methods: {
+    getSequentialNumber(item) {
+      return (
+        this.sortedItems.findIndex(
+          (i) => i.impact_num_id === item.impact_num_id
+        ) + 1
+      );
+    },
+    formatText(text) {
+      return text ? text.replace(/\n/g, "<br>") : "";
+    },
     async fetchData() {
       this.loading = true;
       try {
@@ -169,12 +185,10 @@ export default {
         params: { id: item.impact_num_id },
       });
     },
-    // Opens the dialog and sets the item to delete
     confirmDelete(item) {
       this.itemToDelete = item;
       this.dialog = true;
       this.$nextTick(() => {
-        // Focus on the cancel button when the dialog opens
         if (this.$refs.cancelBtn) {
           this.$refs.cancelBtn.$el.focus();
         }
@@ -218,16 +232,7 @@ export default {
         img_hover: item.img_hover,
       });
 
-      // Attempt to construct a corrected URL
       let correctedUrl = item.img;
-      // if (correctedUrl) {
-      //     // Remove multiple consecutive slashes
-      //     correctedUrl = correctedUrl.replace(/([^:]\/)\/+/g, "$1");
-      //     // Ensure there's exactly one slash after 'http://' or 'https://'
-      //     correctedUrl = correctedUrl.replace(/(https?:\/\/)\/*/g, "$1/");
-      //     console.log("Attempted corrected URL:", correctedUrl);
-      // }
-
       this.$set(item, "img", correctedUrl || require("@/assets/default.png"));
     },
   },
@@ -274,5 +279,11 @@ td {
 ::v-deep .v-data-table-header th {
   font-weight: 900;
   background-color: rgb(228, 228, 228);
+}
+.p-desc {
+  margin-top: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

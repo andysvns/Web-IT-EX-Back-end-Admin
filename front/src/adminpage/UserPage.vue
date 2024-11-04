@@ -24,54 +24,20 @@
         :items-per-page="15"
         class="elevation-1"
       >
-        <template v-slot:item="{ item, index }">
+        <template v-slot:item="{ item }">
           <tr>
-            <td class="text-center">{{ index + 1 }}</td>
+            <td class="text-center">{{ getSequentialNumber(item) }}</td>
             <td class="username-text-td">{{ item.username }}</td>
             <td class="name-text-td">{{ item.name }}</td>
             <td>{{ formatDate(item.created_at) }}</td>
             <td>{{ formatDate(item.updated_at) }}</td>
-            <!-- <td class="action-td">
-              <v-btn text small @click="editItem(item)">
-                <v-icon color="secondary">mdi-pencil-outline</v-icon>
-              </v-btn>
-              <v-btn text small @click="confirmDelete(item)">
-                <v-icon color="#EA2A2D">mdi-delete</v-icon>
-              </v-btn>
-            </td> -->
           </tr>
         </template>
       </v-data-table>
 
-      <!-- Confirmation Dialog -->
-      <v-dialog v-model="dialog" max-width="400">
-        <v-card>
-          <v-card-title class="headline">Are you sure?</v-card-title>
-          <v-card-text>
-            Are you sure you want to delete this item?
-          </v-card-text>
 
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="closeDialog"
-              >Cancel</v-btn
-            >
-            <v-btn color="red darken-1" text @click="deleteItem">Delete</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
 
-      <!-- Snackbar for deletion confirmation -->
-      <v-snackbar v-model="snackbarSuccess" bottom right color="success">
-        <v-icon color="white" left>mdi-check-circle</v-icon>
-        Item deleted successfully!
-        <v-btn color="white" text @click="snackbarSuccess = false">Close</v-btn>
-      </v-snackbar>
-      <v-snackbar v-model="snackbarError" bottom right color="error">
-        <v-icon color="white" left>mdi-alert-circle</v-icon>
-        Failed to delete item. Please try again.
-        <v-btn color="white" text @click="snackbarError = false">Close</v-btn>
-      </v-snackbar>
+
     </v-card>
   </v-container>
 </template>
@@ -90,10 +56,9 @@ export default {
       headers: [
         {
           text: "List",
-          value: "list",
+          value: "id",
           headerClass: "text-center",
           align: "center",
-          sortable: false,
         },
         {
           text: "User name",
@@ -112,16 +77,21 @@ export default {
         { text: "Updated at", value: "updated_at", align: "center" },
         // { text: "Actions", value: "actions", sortable: false, align: "center" },
       ],
-      dialog: false, // Controls the dialog visibility
-      snackbarSuccess: false, // Controls the success snackbar visibility
-      snackbarError: false, // Controls the error snackbar visibility
-      itemToDelete: null, // Stores the item to be deleted
+
     };
+  },
+  computed: {
+    sortedItems() {
+      return [...this.items].sort((a, b) => a.id - b.id);
+    },
   },
   mounted() {
     this.fetchData();
   },
   methods: {
+    getSequentialNumber(item) {
+      return this.sortedItems.findIndex((i) => i.id === item.id) + 1;
+    },
     async fetchData() {
       this.loading = true;
       try {
@@ -146,53 +116,11 @@ export default {
     addNewItem() {
       this.$router.push({ name: "userCreate" });
     },
-    editItem(item) {
-      this.$router.push({
-        name: "userEdit",
-        params: { id: item.list_task_id },
-      });
-    },
-    // Opens the dialog and sets the item to delete
-    confirmDelete(item) {
-      this.itemToDelete = item;
-      this.dialog = true;
-      this.$nextTick(() => {
-        // Focus on the cancel button when the dialog opens
-        if (this.$refs.cancelBtn) {
-          this.$refs.cancelBtn.$el.focus();
-        }
-      });
-    },
-    closeDialog() {
-      this.dialog = false;
-      this.itemToDelete = null;
-    },
-    async deleteItem() {
-      if (!this.itemToDelete) {
-        console.error("No item selected for deletion");
-        this.closeDialog();
-        return;
-      }
 
-      this.loading = true;
-      try {
-        const response = await axios.put(
-          `http://localhost:3000/api/listtask/del/${this.itemToDelete.list_task_id}`
-        );
-        if (response.status === 200) {
-          this.snackbarSuccess = true;
-          await this.fetchData();
-        } else {
-          throw new Error("Unexpected response status");
-        }
-      } catch (error) {
-        console.error("Error during deletion:", error);
-        this.snackbarError = true;
-      } finally {
-        this.loading = false;
-        this.closeDialog();
-      }
-    },
+    // Opens the dialog and sets the item to delete
+
+
+
     formatDate(dateString) {
       if (!dateString) return "";
       const date = new Date(dateString);

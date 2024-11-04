@@ -60,13 +60,26 @@
                 v-model="item.title"
                 outlined
               ></v-text-field>
-              <v-textarea
-                label="Description"
-                :rules="descRules"
-                v-model="item.desc"
-                rows="10"
-                outlined
-              ></v-textarea>
+              <div class="editor-wrapper">
+                <label class="v-label theme--light">Description</label>
+                <vue-editor
+                  v-model="item.desc"
+                  :editor-toolbar="customToolbar"
+                  @blur="validateDescription"
+                  :class="{ 'error--text': descriptionError }"
+                  class="mt-1"
+                ></vue-editor>
+                <div
+                  v-if="descriptionError"
+                  class="v-messages theme--light error--text"
+                >
+                  <div class="v-messages__wrapper">
+                    <div class="v-messages__message">
+                      Description is required
+                    </div>
+                  </div>
+                </div>
+              </div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -89,15 +102,20 @@
 </template>
 
 <script>
+import { VueEditor } from "vue2-editor";
 import axios from "axios";
 
 export default {
   name: "ContactForm",
+  components: {
+    VueEditor,
+  },
   data() {
     return {
       valid: false,
       snackbarSuccess: false,
       snackbarError: false,
+      descriptionError: false,
       item: {
         img: "",
         title: "",
@@ -108,6 +126,17 @@ export default {
       displayedImageUrl: null,
       titleRules: [(v) => !!v || "Title is required"],
       descRules: [(v) => !!v || "Description required"],
+
+      customToolbar: [
+        ["bold", "italic", "underline", "strike"],
+        ["blockquote"],
+        [{ header: 1 }, { header: 2 }],
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ align: [] }],
+        [{ color: [] }, { background: [] }],
+        ["clean"],
+        
+      ],
     };
   },
   created() {
@@ -151,7 +180,7 @@ export default {
       }
     },
     validateAndUpdate() {
-      if (this.$refs.form.validate()) {
+      if (this.$refs.form.validate() && this.validateDescription()) {
         this.updateItem();
       } else {
         console.error("Form validation failed");
@@ -194,6 +223,11 @@ export default {
         console.error("Failed to update item:", err);
         this.snackbarError = true;
       }
+    },
+    validateDescription() {
+      this.descriptionError = !this.item.desc;
+      this.valid = this.$refs.form.validate() && !this.descriptionError;
+      return !this.descriptionError;
     },
   },
 };

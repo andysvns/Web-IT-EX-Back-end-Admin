@@ -24,9 +24,9 @@
         :items-per-page="15"
         class="elevation-1"
       >
-        <template v-slot:item="{ item, index }">
+        <template v-slot:item="{ item }">
           <tr>
-            <td class="text-center">{{ index + 1 }}</td>
+            <td class="text-center">{{ getSequentialNumber(item) }}</td>
             <td class="img-td">
               <v-img
                 :src="item.img || require('@/assets/default.png')"
@@ -37,7 +37,10 @@
               ></v-img>
             </td>
             <td class="title-td">{{ item.title }}</td>
-            <td class="desc-td">{{ item.desc }}</td>
+            <td class="desc-td">
+              {{ item.desc }}
+              <!-- <div v-html="formatText(item.desc)" class="p-desc"></div> -->
+            </td>
             <td class="action-td">
               <v-btn class="mr-5" text small @click="editItem(item)">
                 <v-icon color="secondary">mdi-pencil-outline</v-icon>
@@ -97,10 +100,9 @@ export default {
       headers: [
         {
           text: "List",
-          value: "list",
+          value: "our_product_id",
           headerClass: "text-center",
           align: "center",
-          sortable: false,
         },
         {
           text: "Image",
@@ -119,10 +121,27 @@ export default {
       itemToDelete: null, // Stores the item to be deleted
     };
   },
+  computed: {
+    sortedItems() {
+      return [...this.items].sort(
+        (a, b) => a.our_product_id - b.our_product_id
+      );
+    },
+  },
   mounted() {
     this.fetchData();
   },
   methods: {
+    getSequentialNumber(item) {
+      return (
+        this.sortedItems.findIndex(
+          (i) => i.our_product_id === item.our_product_id
+        ) + 1
+      );
+    },
+    formatText(text) {
+      return text ? text.replace(/\n/g, "<br>") : "";
+    },
     async fetchData() {
       this.loading = true;
       try {
@@ -231,8 +250,11 @@ export default {
 
 .desc-td {
   max-width: 300px;
+  max-height: 150px;
   white-space: nowrap;
   overflow-x: hidden;
+  overflow-y: hidden;
+
   text-overflow: ellipsis;
 }
 
@@ -259,5 +281,11 @@ td {
 ::v-deep .v-data-table-header th {
   font-weight: 900;
   background-color: rgb(228, 228, 228);
+}
+.p-desc {
+  /* white-space: nowrap; */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 16px;
 }
 </style>

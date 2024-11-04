@@ -41,9 +41,9 @@
         :items-per-page="15"
         class="elevation-1"
       >
-        <template v-slot:item="{ item, index }">
+        <template v-slot:item="{ item }">
           <tr>
-            <td class="text-center">{{ index + 1 }}</td>
+            <td class="text-center">{{ getSequentialNumber(item) }}</td>
             <td class="img-td">
               <v-icon color="secondary" class="icon-item">
                 {{ item.icon }}
@@ -114,7 +114,11 @@ export default {
       stackOptions: [],
       error: null,
       headers: [
-        { text: "List", value: "list", align: "center", sortable: false },
+        {
+          text: "List",
+          value: "social_url_id",
+          align: "center",
+        },
         { text: "Icon", value: "img", align: "center", sortable: false },
         { text: "Name", value: "title", align: "center" },
         { text: "Link", value: "social_url", align: "center" },
@@ -141,12 +145,23 @@ export default {
       itemToDelete: null,
     };
   },
+  computed: {
+    sortedItems() {
+      return [...this.items].sort((a, b) => a.social_url_id - b.social_url_id);
+    },
+  },
   mounted() {
     this.fetchStackTypes();
     this.fetchData();
-
   },
   methods: {
+    getSequentialNumber(item) {
+      return (
+        this.sortedItems.findIndex(
+          (i) => i.social_url_id === item.social_url_id
+        ) + 1
+      );
+    },
     async fetchStackTypes() {
       try {
         const response = await axios.get(
@@ -240,11 +255,8 @@ export default {
       this.$router.push({ name: "SocialType" });
     },
 
-
-
     closeDialog() {
       this.dialog = false;
-
     },
     addNewItemType() {
       if (!this.newType.s_type_name) {

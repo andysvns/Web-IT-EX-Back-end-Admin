@@ -54,7 +54,7 @@
     <!-- Success snackbar -->
     <v-snackbar v-model="snackbarSuccess" bottom right color="success">
       <v-icon color="white" left>mdi-check-circle</v-icon>
-      Registration successful!
+      User creadted successful!
       <v-btn color="white" text @click="snackbarSuccess = false">Close</v-btn>
     </v-snackbar>
 

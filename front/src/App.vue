@@ -504,4 +504,49 @@ export default {
     margin-right: 0;
   }
 }
+
+.editor-wrapper {
+  position: relative;
+  margin-bottom: 24px;
+
+  .v-label {
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+  }
+
+  ::v-deep .ql-toolbar {
+    border: 1px solid rgba(0, 0, 0, 0.38);
+    border-bottom: none;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    background-color: #f8f9fa;
+  }
+
+  ::v-deep .ql-container {
+    border: 1px solid rgba(0, 0, 0, 0.38);
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    min-height: 200px;
+  }
+
+  &:hover {
+    ::v-deep .ql-toolbar,
+    ::v-deep .ql-container {
+      border-color: #000;
+    }
+  }
+
+  &.error--text {
+    ::v-deep .ql-toolbar,
+    ::v-deep .ql-container {
+      border-color: #ff5252;
+    }
+  }
+}
+.ql-color .ql-picker-options [data-value="#e60000"] {
+  background-color: #e60000; /* Example color */
+}
+.ql-color .ql-picker-options [data-value="#ff9900"] {
+  background-color: #ff9900;
+}
 </style>

@@ -24,9 +24,9 @@
         :items-per-page="15"
         class="elevation-1"
       >
-        <template v-slot:item="{ item, index }">
+        <template v-slot:item="{ item }">
           <tr>
-            <td class="text-center">{{ index + 1 }}</td>
+            <td class="text-center">{{ getSequentialNumber(item) }}</td>
             <td class="icon-td">
               <v-icon color="secondary" class="icon-item">
                 {{ item.icon }}
@@ -34,7 +34,10 @@
             </td>
             <td class="icon-text-td">{{ item.icon }}</td>
             <td class="title-td">{{ item.title }}</td>
-            <td class="desc-td">{{ item.desc }}</td>
+            <td class="desc-td">
+              {{ item.desc }}
+              <!-- <div v-html="formatText(item.desc)" class="p-desc "></div> -->
+            </td>
             <td class="action-td">
               <v-btn class="mr-5" text small @click="editItem(item)">
                 <v-icon color="secondary">mdi-pencil-outline</v-icon>
@@ -94,10 +97,9 @@ export default {
       headers: [
         {
           text: "List",
-          value: "list",
+          value: "list_task_id",
           headerClass: "text-center",
           align: "center",
-          sortable: false,
         },
         {
           text: "Icon",
@@ -122,10 +124,25 @@ export default {
       itemToDelete: null, // Stores the item to be deleted
     };
   },
+  computed: {
+    sortedItems() {
+      return [...this.items].sort((a, b) => a.list_task_id - b.list_task_id);
+    },
+  },
   mounted() {
     this.fetchData();
   },
   methods: {
+    getSequentialNumber(item) {
+      return (
+        this.sortedItems.findIndex(
+          (i) => i.list_task_id === item.list_task_id
+        ) + 1
+      );
+    },
+    formatText(text) {
+      return text ? text.replace(/\n/g, "<br>") : "";
+    },
     async fetchData() {
       this.loading = true;
       try {
@@ -216,13 +233,21 @@ export default {
 
 .desc-td {
   max-width: 350px;
+  max-height: 150px;
   white-space: nowrap;
   overflow-x: hidden;
+  overflow-y: hidden;
+
   text-overflow: ellipsis;
+}
+.p-desc {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 16px;
 }
 
 .action-td {
-  
   display: flex;
   justify-content: center;
   align-items: center;
