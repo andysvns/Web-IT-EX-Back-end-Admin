@@ -24,9 +24,9 @@
         :items-per-page="15"
         class="elevation-1"
       >
-        <template v-slot:item="{ item, index }">
+        <template v-slot:item="{ item }">
           <tr>
-            <td class="text-center">{{ index + 1 }}</td>
+            <td class="text-center">{{ getSequentialNumber(item) }}</td>
             <td class="img-td">
               <v-img
                 :src="item.img || require('@/assets/default.png')"
@@ -39,7 +39,7 @@
             <td class="title-td">{{ item.partner_name }}</td>
             <td class="action-td">
               <v-btn class="mr-5" text small @click="editItem(item)">
-                <v-icon  color="secondary">mdi-pencil-outline</v-icon>
+                <v-icon color="secondary">mdi-pencil-outline</v-icon>
               </v-btn>
               <v-btn text small @click="confirmDelete(item)">
                 <v-icon color="#EA2A2D">mdi-delete</v-icon>
@@ -96,10 +96,10 @@ export default {
       headers: [
         {
           text: "List",
-          value: "list",
+          value: "our_partner_id", // Changed from "list"
           headerClass: "text-center",
           align: "center",
-          sortable: false,
+          sortable: true,
         },
         {
           text: "Image",
@@ -117,10 +117,24 @@ export default {
       itemToDelete: null, // Stores the item to be deleted
     };
   },
+  computed: {
+    sortedItems() {
+      return [...this.items].sort(
+        (a, b) => a.our_partner_id - b.our_partner_id
+      );
+    },
+  },
   mounted() {
     this.fetchData();
   },
   methods: {
+    getSequentialNumber(item) {
+      return (
+        this.sortedItems.findIndex(
+          (i) => i.our_partner_id === item.our_partner_id
+        ) + 1
+      );
+    },
     async fetchData() {
       this.loading = true;
       try {

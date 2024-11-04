@@ -24,9 +24,9 @@
         :items-per-page="15"
         class="elevation-1"
       >
-        <template v-slot:item="{ item, index }">
+        <template v-slot:item="{ item }">
           <tr>
-            <td class="text-center">{{ index + 1 }}</td>
+            <td class="text-center">{{ getSequentialNumber(item) }}</td>
             <td class="img-td">
               <v-img
                 :src="item.mem_img || require('@/assets/default.png')"
@@ -99,10 +99,9 @@ export default {
       headers: [
         {
           text: "List",
-          value: "list",
+          value: "team_mem_id",
           headerClass: "text-center",
           align: "center",
-          sortable: false,
         },
         {
           text: "Image",
@@ -123,10 +122,21 @@ export default {
       itemToDelete: null, // Stores the item to be deleted
     };
   },
+  computed: {
+    sortedItems() {
+      return [...this.items].sort((a, b) => a.team_mem_id - b.team_mem_id);
+    },
+  },
   mounted() {
     this.fetchData();
   },
   methods: {
+    getSequentialNumber(item) {
+      return (
+        this.sortedItems.findIndex((i) => i.team_mem_id === item.team_mem_id) +
+        1
+      );
+    },
     async fetchData() {
       this.loading = true;
       try {

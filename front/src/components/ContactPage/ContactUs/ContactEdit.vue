@@ -53,7 +53,7 @@
                 :rules="locationRules"
                 label="Location"
                 outlined
-                rows="3"
+                rows="4"
                 placeholder="Please Enter"
                 required
                 :loading="loading"
@@ -68,7 +68,7 @@
                 outlined
                 placeholder="Please Enter"
                 required
-                rows="4"
+                rows="5"
                 auto-grow
                 :loading="loading"
                 :disabled="loading"
@@ -88,7 +88,7 @@
       right
       :timeout="3000"
     >
-      <v-icon :color="white" left>{{ snackbar.icon }}</v-icon>
+      <v-icon left>{{ snackbar.icon }}</v-icon>
       {{ snackbar.message }}
       <template v-slot:action="{ attrs }">
         <v-btn text v-bind="attrs" @click="snackbar.show = false">

@@ -50,11 +50,7 @@
                     dark
                   ></v-checkbox>
                 </v-col>
-                <v-col cols="6" class="text-right">
-                  <a href="/adminregister" class="white--text custom-register"
-                    >Register</a
-                  >
-                </v-col>
+
               </v-row>
 
               <v-alert v-if="errorMessage" type="error" dense outlined>

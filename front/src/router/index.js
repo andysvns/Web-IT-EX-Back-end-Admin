@@ -50,13 +50,6 @@ const routes = [
       import("../components/HomeComponents/BackgroundPage/Background.vue"),
     meta: { title: "Background", requiresAuth: true },
   },
-  {
-    path: "/background/edit/:id",
-    name: "BackgroundEdit",
-    component: () =>
-      import("../components/HomeComponents/BackgroundPage/BackgroundEdit.vue"),
-    meta: { title: "Background Edit", requiresAuth: true },
-  },
 
   {
     path: "/homeaboutus",

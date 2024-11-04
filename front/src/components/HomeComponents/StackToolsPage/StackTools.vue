@@ -41,9 +41,9 @@
         :items-per-page="15"
         class="elevation-1"
       >
-        <template v-slot:item="{ item, index }">
+        <template v-slot:item="{ item }">
           <tr>
-            <td class="text-center">{{ index + 1 }}</td>
+            <td class="text-center">{{ getSequentialNumber(item) }}</td>
             <td class="img-td">
               <v-img
                 :src="item.img || require('@/assets/default.png')"
@@ -117,7 +117,7 @@ export default {
       stackOptions: [],
       error: null,
       headers: [
-        { text: "List", value: "list", align: "center", sortable: false },
+        { text: "List", value: "our_st_id", align: "center" },
         { text: "Image", value: "img", align: "center", sortable: false },
         { text: "Tool name", value: "tool_name", align: "center" },
         { text: "Type", value: "stack_name", align: "center" },
@@ -129,11 +129,21 @@ export default {
       itemToDelete: null,
     };
   },
+  computed: {
+    sortedItems() {
+      return [...this.items].sort((a, b) => a.our_st_id - b.our_st_id);
+    },
+  },
   mounted() {
     this.fetchStackTypes();
     this.fetchData();
   },
   methods: {
+    getSequentialNumber(item) {
+      return (
+        this.sortedItems.findIndex((i) => i.our_st_id === item.our_st_id) + 1
+      );
+    },
     async fetchStackTypes() {
       try {
         const response = await axios.get(

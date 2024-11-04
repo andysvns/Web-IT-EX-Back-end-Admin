@@ -88,12 +88,21 @@
                 v-model="item.num_text"
                 outlined
               ></v-text-field>
-              <v-text-field
-                label="Description"
-                :rules="descRules"
-                v-model="item.desc"
-                outlined
-              ></v-text-field>
+              <div class="editor-wrapper">
+                <label class="v-label theme--light">Description</label>
+                <vue-editor
+                  v-model="item.desc"
+                  :editor-toolbar="customToolbar"
+                  @blur="validateDescription"
+                  :class="{'error--text': descriptionError}"
+                  class="mt-1"
+                ></vue-editor>
+                <div v-if="descriptionError" class="v-messages theme--light error--text">
+                  <div class="v-messages__wrapper">
+                    <div class="v-messages__message">Description is required</div>
+                  </div>
+                </div>
+              </div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -116,15 +125,20 @@
 
 <script>
 import axios from "axios";
+import { VueEditor } from "vue2-editor";
 
 export default {
   name: "ContactForm",
+  components: {
+    VueEditor
+  },
   data() {
     return {
       valid: false,
       snackbarSuccess: false,
       snackbarError: false,
       errorMessage: "",
+      descriptionError: false,
       item: {
         img: "",
         img_hover: "",
@@ -138,6 +152,16 @@ export default {
       displayedImageHoverUrl: null,
       numRules: [(v) => !!v || "Number is required"],
       descRules: [(v) => !!v || "Description is required"],
+      customToolbar: [
+        ["bold", "italic", "underline", "strike"],
+        ["blockquote"],
+        [{ header: 1 }, { header: 2 }],
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ align: [] }],
+        [{ color: [] }, { background: [] }],
+        ["clean"],
+        
+      ],
     };
   },
   created() {
@@ -191,8 +215,13 @@ export default {
         this.snackbarError = true;
       }
     },
+    validateDescription() {
+      this.descriptionError = !this.item.desc;
+      this.valid = this.$refs.form.validate() && !this.descriptionError;
+      return !this.descriptionError;
+    },
     validateAndUpdate() {
-      if (this.$refs.form.validate()) {
+      if (this.$refs.form.validate() && this.validateDescription()) {
         this.updateItem();
       } else {
         console.error("Form validation failed");

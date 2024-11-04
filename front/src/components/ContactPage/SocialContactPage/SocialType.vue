@@ -27,9 +27,9 @@
         :items-per-page="15"
         class="elevation-1"
       >
-        <template v-slot:item="{ item, index }">
+        <template v-slot:item="{ item }">
           <tr>
-            <td class="text-center">{{ index + 1 }}</td>
+            <td class="text-center">{{ getSequentialNumber(item) }}</td>
             <td class="icon-td text-center">
               <v-icon color="secondary" class="icon-item">
                 {{ item.icon }}
@@ -215,9 +215,8 @@ export default {
       headers: [
         {
           text: "No.",
-          value: "index",
+          value: "social_type_id",
           align: "center",
-          sortable: false,
           width: "80",
         },
         {
@@ -288,11 +287,25 @@ export default {
     };
   },
 
+  computed: {
+    sortedItems() {
+      return [...this.items].sort(
+        (a, b) => a.social_type_id - b.social_type_id
+      );
+    },
+  },
   mounted() {
     this.fetchData();
   },
 
   methods: {
+    getSequentialNumber(item) {
+      return (
+        this.sortedItems.findIndex(
+          (i) => i.social_type_id === item.social_type_id
+        ) + 1
+      );
+    },
     async fetchData() {
       this.loading = true;
       try {
